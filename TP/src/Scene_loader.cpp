@@ -428,6 +428,7 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
                         mat->set_texture(0u, albedo);
                         mat->set_texture(1u, normal);
                     }
+                    mat->set_cull_mode(OM3D::CullMode::Back);
                 }
 
                 material = mat;

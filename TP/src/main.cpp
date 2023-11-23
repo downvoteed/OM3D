@@ -312,6 +312,7 @@ int main(int argc, char** argv) {
             renderer.main_framebuffer.bind();
             scene->render();
         }
+        glDisable(GL_CULL_FACE);
 
         // Apply a tonemap in compute shader
         {
@@ -329,6 +330,7 @@ int main(int argc, char** argv) {
         gui(imgui);
 
         glfwSwapBuffers(window);
+
     }
 
     scene = nullptr; // destroy scene and child OpenGL objects

@@ -21,6 +21,11 @@ void Material::set_depth_test_mode(DepthTestMode depth) {
     _depth_test_mode = depth;
 }
 
+void Material::set_cull_mode(CullMode cull)
+{
+    _cull_mode = cull;
+}
+
 void Material::set_texture(u32 slot, std::shared_ptr<Texture> tex) {
     if(const auto it = std::find_if(_textures.begin(), _textures.end(), [&](const auto& t) { return t.second == tex; }); it != _textures.end()) {
         it->second = std::move(tex);
@@ -30,6 +35,24 @@ void Material::set_texture(u32 slot, std::shared_ptr<Texture> tex) {
 }
 
 void Material::bind() const {
+    switch(_cull_mode)
+    {
+        case CullMode::None:
+            glDisable(GL_CULL_FACE);
+            break;
+        case CullMode::Front:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            break;
+        case CullMode::Back:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            break;
+        case CullMode::Front_and_back:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT_AND_BACK);
+            break;
+    }
     switch(_blend_mode) {
         case BlendMode::None:
             glDisable(GL_BLEND);

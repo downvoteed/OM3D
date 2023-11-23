@@ -21,6 +21,13 @@ enum class DepthTestMode {
     None
 };
 
+enum class CullMode{
+    None,
+    Front,
+    Back,
+    Front_and_back,
+};
+
 class Material {
 
     public:
@@ -30,12 +37,13 @@ class Material {
         void set_blend_mode(BlendMode blend);
         void set_depth_test_mode(DepthTestMode depth);
         void set_texture(u32 slot, std::shared_ptr<Texture> tex);
+        void set_cull_mode(CullMode cull);
 
-        template<typename... Args>
-        void set_uniform(Args&&... args) {
+            template <typename... Args>
+            void set_uniform(Args &&...args)
+        {
             _program->set_uniform(FWD(args)...);
         }
-
 
         void bind() const;
 
@@ -50,6 +58,7 @@ class Material {
 
         BlendMode _blend_mode = BlendMode::None;
         DepthTestMode _depth_test_mode = DepthTestMode::Standard;
+        CullMode _cull_mode = CullMode::Back;
 
 };
 
