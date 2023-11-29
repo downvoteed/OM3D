@@ -78,10 +78,6 @@ void Camera::set_ratio(float ratio) {
     set_proj(perspective(fov(), ratio, extract_near(_projection)));
 }
 
-// void Camera::set_frustum(Frustum& frustum) {
-//     _frustum = frustum;
-// }
-
 glm::vec3 Camera::position() const {
     return extract_position(_view);
 }

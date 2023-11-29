@@ -30,7 +30,6 @@ class Camera {
 
         void set_fov(float fov);
         void set_ratio(float ratio);
-        //void set_frustum(Frustum& frustum);
 
         glm::vec3 position() const;
         glm::vec3 forward() const;
