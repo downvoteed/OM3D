@@ -3,6 +3,7 @@
 #include <TypedBuffer.h>
 
 #include <shader_structs.h>
+#include <iostream>
 
 namespace OM3D {
 
@@ -67,8 +68,17 @@ void Scene::render() const {
     light_buffer.bind(BufferUsage::Storage, 1);
 
     // Render every object
-    for(const SceneObject& obj : _objects) {
-        obj.render();
+    for(const SceneObject& obj : _objects) 
+    {
+        Frustum frustrum =  this->_camera.build_frustum();
+
+        bool is_in_frustrum = frustrum.isInside(obj.get_bounding_sphere());
+
+        std::cout << is_in_frustrum << std::endl;
+
+        if (is_in_frustrum)
+            obj.render();
+
     }
 }
 

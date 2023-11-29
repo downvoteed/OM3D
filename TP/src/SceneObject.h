@@ -17,6 +17,8 @@ class SceneObject {
 
         void render() const;
 
+        Sphere get_bounding_sphere() const;
+
         void set_transform(const glm::mat4& tr);
         const glm::mat4& transform() const;
 

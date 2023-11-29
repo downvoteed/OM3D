@@ -9,6 +9,11 @@ SceneObject::SceneObject(std::shared_ptr<StaticMesh> mesh, std::shared_ptr<Mater
     _material(std::move(material)) {
 }
 
+Sphere SceneObject::get_bounding_sphere() const 
+{
+    return this->_mesh->get_bounding_sphere();
+}
+
 void SceneObject::render() const {
     if(!_material || !_mesh) {
         return;
