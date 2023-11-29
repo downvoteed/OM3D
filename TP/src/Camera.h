@@ -15,20 +15,6 @@ struct Frustum {
     glm::vec3 _bottom_normal;
     glm::vec3 _right_normal;
     glm::vec3 _left_normal;
-
-    bool isInside(const Sphere& sphere) const {
-
-        std::cout << "Sphere center: " << sphere.center().position.x << " " << sphere.center().position.y << " " << sphere.center().position.z << std::endl;
-        std::cout << "Sphere radius: " << sphere.radius() << std::endl;
-        std::cout << "Near normal: " << _near_normal.x << " " << _near_normal.y << " " << _near_normal.z << std::endl;
-        std::cout << "Top normal: " << _top_normal.x << " " << _top_normal.y << " " << _top_normal.z << std::endl;
-        std::cout << "Bottom normal: " << _bottom_normal.x << " " << _bottom_normal.y << " " << _bottom_normal.z << std::endl;
-        std::cout << "Right normal: " << _right_normal.x << " " << _right_normal.y << " " << _right_normal.z << std::endl;
-        std::cout << "Left normal: " << _left_normal.x << " " << _left_normal.y << " " << _left_normal.z << std::endl;
-
-
-        return true;
-    }
 };
 
 
@@ -44,6 +30,7 @@ class Camera {
 
         void set_fov(float fov);
         void set_ratio(float ratio);
+        //void set_frustum(Frustum& frustum);
 
         glm::vec3 position() const;
         glm::vec3 forward() const;
@@ -60,6 +47,8 @@ class Camera {
         float ratio() const;
 
         Frustum build_frustum() const;
+
+        bool isInside(const Sphere& sphere, const Frustum& frustum) const;
 
     private:
         void update();

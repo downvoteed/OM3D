@@ -78,6 +78,10 @@ void Camera::set_ratio(float ratio) {
     set_proj(perspective(fov(), ratio, extract_near(_projection)));
 }
 
+// void Camera::set_frustum(Frustum& frustum) {
+//     _frustum = frustum;
+// }
+
 glm::vec3 Camera::position() const {
     return extract_position(_view);
 }
@@ -146,6 +150,25 @@ Frustum Camera::build_frustum() const {
     }
 
     return frustum;
+}
+bool Camera::isInside(const Sphere& sphere, const Frustum& frustum) const
+{
+    if (dot(frustum._top_normal, sphere.center().position - this->position()) < -sphere.radius())
+        return false;
+    
+    if (dot(frustum._bottom_normal, sphere.center().position - this->position()) < -sphere.radius())
+        return false;
+
+    if (dot(frustum._right_normal, sphere.center().position - this->position()) < -sphere.radius())
+        return false;
+
+    if (dot(frustum._left_normal, sphere.center().position - this->position()) < -sphere.radius())
+        return false;
+
+    if (dot(frustum._near_normal, sphere.center().position - (this->position() + this->forward())) < -sphere.radius())
+        return false;
+
+    return true;
 }
 
 }

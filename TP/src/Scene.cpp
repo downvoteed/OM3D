@@ -70,13 +70,14 @@ void Scene::render() const {
     // Render every object
     for(const SceneObject& obj : _objects) 
     {
-        Frustum frustrum =  this->_camera.build_frustum();
+        Frustum frustum =  this->_camera.build_frustum();
+        //this->_camera.set_frustum(frustum);
 
-        bool is_in_frustrum = frustrum.isInside(obj.get_bounding_sphere());
+        bool is_in_frustum = this->_camera.isInside(obj.get_bounding_sphere(), frustum);
 
-        std::cout << is_in_frustrum << std::endl;
+        std::cout << is_in_frustum << std::endl;
 
-        if (is_in_frustrum)
+        if (is_in_frustum)
             obj.render();
 
     }
