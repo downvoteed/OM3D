@@ -56,12 +56,19 @@ glm::mat4 Camera::perspective(float fov_y, float ratio, float z_near) {
 
 Camera::Camera() {
     _projection = perspective(to_rad(60.0f), 16.0f / 9.0f, 0.001f);
-    _view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    //_view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 4.0f, 0.0f));
+    // pour la foret
+    _view = glm::lookAt(glm::vec3(200.0f, 300.0f, 300.0f), // Augmente la hauteur et recule la caméra
+                    glm::vec3(0.f, 0.f, 0.f),    // Point de cible inchangé
+                    glm::vec3(0.0f, 4.0f, 0.0f));// Vecteur vers le haut inchangé
+
+
     update();
 }
 
 void Camera::set_view(const glm::mat4& matrix) {
     _view = matrix;
+    //std::cout << "Camera position: " << extract_position(_view).x << " " << extract_position(_view).y << " " << extract_position(_view).z << std::endl;
     update();
 }
 

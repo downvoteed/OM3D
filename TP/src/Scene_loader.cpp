@@ -364,11 +364,14 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
         if(node.mesh < 0) {
             continue;
         }
+        std::cout << "obj name: " << node.name << std::endl;
 
         const tinygltf::Mesh& mesh = gltf.meshes[node.mesh];
 
         for(size_t j = 0; j != mesh.primitives.size(); ++j) {
             const tinygltf::Primitive& prim = mesh.primitives[j];
+
+            // print obj name
 
             if(prim.mode != TINYGLTF_MODE_TRIANGLES) {
                 continue;
@@ -437,6 +440,7 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
             auto scene_object = SceneObject(std::make_shared<StaticMesh>(mesh.value), std::move(material));
             scene_object.set_transform(node_transform);
             scene->add_object(std::move(scene_object));
+            scene->_obj_name_to_index[node.name] = node_index;
         }
     }
 

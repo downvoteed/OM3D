@@ -4,6 +4,8 @@
 
 #include <shader_structs.h>
 #include <iostream>
+#include <unordered_map>
+#include <set>
 
 namespace OM3D {
 
@@ -67,12 +69,57 @@ void Scene::render() const {
     }
     light_buffer.bind(BufferUsage::Storage, 1);
 
-    // Render every object
-    for(const SceneObject& obj : _objects) 
+    for (const auto& obj: this->_obj_name_to_index)
     {
-        Frustum frustum =  this->_camera.build_frustum();
+        std::cout << obj.first << std::endl;
+    }
+
+    std::unordered_map<std::string, std::set<const SceneObject*>> cluster_objects;
+
+    int i = 0;
+    for (const auto &obj_pair : this->_obj_name_to_index)
+    {
+        std::string basename;
+
+        for (char ch : obj_pair.first)
+        {
+            if (std::isalpha(ch))
+            {
+                basename += ch;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        // Ajouter l'objet au set correspondant à son nom de base
+        cluster_objects[basename].insert(&_objects[i]);
+        i++;
+    }
+
+    for (const auto &pair : cluster_objects)
+    {
+        std::cout << "Nom de base: " << pair.first << " - Objets: ";
+        int j = 0;
+        for (const SceneObject *obj : pair.second)
+        {
+            std::cout << "Objet " << j << ": " << std::endl;
+            j++;
+        }
+        std::cout << std::endl;
+    }
+
+    // Render every object
+    for (const SceneObject &obj : _objects)
+    {
+        Frustum frustum = this->_camera.build_frustum();
 
         bool is_in_frustum = this->_camera.isInside(obj.get_bounding_sphere(), frustum);
+
+        // cluster the objects having the same basename in a set
+
+        // std::cout << is_in_frustum << std::endl;
 
         if (is_in_frustum)
             obj.render();

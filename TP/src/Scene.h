@@ -4,6 +4,7 @@
 #include <SceneObject.h>
 #include <PointLight.h>
 #include <Camera.h>
+#include <unordered_map>
 
 #include <vector>
 #include <memory>
@@ -36,6 +37,9 @@ class Scene : NonMovable {
 
         glm::vec3 _sun_direction = glm::vec3(0.2f, 1.0f, 0.1f);
         glm::vec3 _sun_color = glm::vec3(1.0f);
+
+        // map obj name to obj index
+        std::unordered_map<std::string, size_t> _obj_name_to_index;
 
 
         Camera _camera;
