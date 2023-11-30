@@ -20,7 +20,7 @@ class Sphere
 {
     private:
         Vertex center_;
-        float radius_;
+        double radius_;
 
     public:
 
@@ -45,10 +45,10 @@ class Sphere
             center.position.y = (minVertex.position.y + maxVertex.position.y) / 2;
             center.position.z = (minVertex.position.z + maxVertex.position.z) / 2;
 
-            float radius = 0.0f;
+            double radius = 0.0f;
             for (const auto &v : _vertex_buffer)
             {
-                float dist = sqrt(pow(v.position.x - center.position.x, 2) 
+                double dist = sqrt(pow(v.position.x - center.position.x, 2) 
                 + pow(v.position.y - center.position.y, 2) + pow(v.position.z - center.position.z, 2));
                 radius = std::max(radius, dist);
             }
@@ -61,7 +61,7 @@ class Sphere
         {
             return this->center_;
         }
-        float radius() const
+        double radius() const
         {
             return this->radius_;
         }
