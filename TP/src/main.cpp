@@ -242,6 +242,7 @@ struct RendererState {
             state.g_buffer_normal = Texture(size, ImageFormat::RGBA8_UNORM);
 
             state.g_buffer = Framebuffer(&state.depth_texture, std::array{&state.g_buffer_albedo, &state.g_buffer_normal});
+            state.g_buffer_debug = Framebuffer(nullptr, std::array{&state.g_buffer_albedo});
         }
 
         return state;
@@ -257,7 +258,9 @@ struct RendererState {
 
     Framebuffer main_framebuffer;
     Framebuffer tone_map_framebuffer;
+
     Framebuffer g_buffer;
+    Framebuffer g_buffer_debug;
 };
 
 
@@ -319,7 +322,8 @@ int main(int argc, char** argv) {
 
         // Render the scene
         {
-            renderer.main_framebuffer.bind();
+            //renderer.main_framebuffer.bind();
+            renderer.g_buffer.bind();
             scene->render();
         }
         glDisable(GL_CULL_FACE);
@@ -335,6 +339,7 @@ int main(int argc, char** argv) {
         }
 
         {
+            renderer.g_buffer_debug.bind();
             g_buffer_program->bind();
             renderer.g_buffer_albedo.bind(0);
             renderer.g_buffer_normal.bind(1);
@@ -345,7 +350,7 @@ int main(int argc, char** argv) {
         // Blit tonemap result to screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //renderer.tone_map_framebuffer.blit();
-        renderer.g_buffer.blit();
+        renderer.g_buffer_debug.blit();
 
         gui(imgui);
 
