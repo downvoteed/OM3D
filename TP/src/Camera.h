@@ -6,6 +6,7 @@
 #include <utils.h>
 #include <StaticMesh.h>
 #include <iostream>
+#include <SceneObject.h>
 
 namespace OM3D {
 
@@ -47,10 +48,9 @@ class Camera {
 
         Frustum build_frustum() const;
 
-        bool isInside(const Sphere& sphere, const Frustum& frustum) const;
+        bool isInside(const SceneObject&, const Frustum&) const;
 
-    private:
-        void update();
+            private : void update();
 
         glm::mat4 _projection;
         glm::mat4 _view;

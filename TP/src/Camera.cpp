@@ -154,21 +154,25 @@ Frustum Camera::build_frustum() const {
 
     return frustum;
 }
-bool Camera::isInside(const Sphere& sphere, const Frustum& frustum) const
+bool Camera::isInside(const SceneObject& obj, const Frustum& frustum) const
 {
-    if (dot(frustum._top_normal, sphere.center().position - this->position()) < -sphere.radius())
+    float radius = obj.get_bounding_sphere().radius();
+    glm::vec4 test = obj.transform() * glm::vec4(obj.get_bounding_sphere().center().position, 1.0f);
+    glm::vec3 sphere_position = glm::vec3(test.x, test.y, test.z);
+
+    if (dot(frustum._top_normal, sphere_position - this->position()) < -radius)
         return false;
     
-    if (dot(frustum._bottom_normal, sphere.center().position - this->position()) < -sphere.radius())
+    if (dot(frustum._bottom_normal, sphere_position - this->position()) < -radius)
         return false;
 
-    if (dot(frustum._right_normal, sphere.center().position - this->position()) < -sphere.radius())
+    if (dot(frustum._right_normal, sphere_position - this->position()) < -radius)
         return false;
 
-    if (dot(frustum._left_normal, sphere.center().position - this->position()) < -sphere.radius())
+    if (dot(frustum._left_normal, sphere_position - this->position()) < -radius)
         return false;
 
-    if (dot(frustum._near_normal, sphere.center().position - (this->position() + this->forward())) < -sphere.radius())
+    if (dot(frustum._near_normal, sphere_position - (this->position() + this->forward())) < -radius)
         return false;
 
     return true;

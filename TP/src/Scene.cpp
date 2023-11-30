@@ -84,16 +84,11 @@ void Scene::render() const {
         for (char ch : obj_pair.first)
         {
             if (std::isalpha(ch))
-            {
                 basename += ch;
-            }
             else
-            {
                 break;
-            }
         }
 
-        // Ajouter l'objet au set correspondant à son nom de base
         cluster_objects[basename].insert(&_objects[i]);
         i++;
     }
@@ -115,7 +110,8 @@ void Scene::render() const {
     {
         Frustum frustum = this->_camera.build_frustum();
 
-        bool is_in_frustum = this->_camera.isInside(obj.get_bounding_sphere(), frustum);
+
+        bool is_in_frustum = this->_camera.isInside(obj, frustum);
 
         // cluster the objects having the same basename in a set
 
