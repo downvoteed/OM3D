@@ -341,9 +341,9 @@ int main(int argc, char** argv) {
         {
             renderer.g_buffer_debug.bind();
             g_buffer_program->bind();
-            renderer.g_buffer_albedo.bind(0);
-            renderer.g_buffer_normal.bind(1);
-            renderer.depth_texture.bind(2);
+            renderer.depth_texture.bind(0);
+            renderer.g_buffer_albedo.bind(1);
+            renderer.g_buffer_normal.bind(2);
             glDrawArrays(GL_TRIANGLES, 0, 3);
         }
 
