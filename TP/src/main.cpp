@@ -242,7 +242,7 @@ struct RendererState {
             state.g_buffer_normal = Texture(size, ImageFormat::RGBA8_UNORM);
 
             state.g_buffer = Framebuffer(&state.depth_texture, std::array{&state.g_buffer_albedo, &state.g_buffer_normal});
-            state.g_buffer_debug = Framebuffer(nullptr, std::array{&state.g_buffer_albedo});
+            state.g_buffer_debug = Framebuffer(nullptr, std::array{&state.g_buffer_albedo, &state.g_buffer_normal, &state.depth_texture});
         }
 
         return state;
@@ -330,13 +330,13 @@ int main(int argc, char** argv) {
 
         // Apply a tonemap in compute shader
         //FIXME: TP3
-        {
-            renderer.tone_map_framebuffer.bind();
-            tonemap_program->bind();
-            tonemap_program->set_uniform(HASH("exposure"), exposure);
-            renderer.lit_hdr_texture.bind(0);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-        }
+        // {
+        //     renderer.tone_map_framebuffer.bind();
+        //     tonemap_program->bind();
+        //     tonemap_program->set_uniform(HASH("exposure"), exposure);
+        //     renderer.lit_hdr_texture.bind(0);
+        //     glDrawArrays(GL_TRIANGLES, 0, 3);
+        // }
 
         {
             renderer.g_buffer_debug.bind();
