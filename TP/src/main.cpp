@@ -242,7 +242,7 @@ struct RendererState {
             state.g_buffer_normal = Texture(size, ImageFormat::RGBA8_UNORM);
 
             state.g_buffer = Framebuffer(&state.depth_texture, std::array{&state.g_buffer_albedo, &state.g_buffer_normal});
-            state.g_buffer_debug = Framebuffer(nullptr, std::array{&state.g_buffer_albedo, &state.g_buffer_normal, &state.depth_texture});
+            state.g_buffer_debug = Framebuffer(&state.depth_texture, std::array{&state.g_buffer_albedo, &state.g_buffer_normal});
         }
 
         return state;
