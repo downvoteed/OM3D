@@ -69,10 +69,10 @@ void Scene::render() const {
     }
     light_buffer.bind(BufferUsage::Storage, 1);
 
-    for (const auto& obj: this->_obj_name_to_index)
-    {
-        std::cout << obj.first << std::endl;
-    }
+    // for (const auto& obj: this->_obj_name_to_index)
+    // {
+    //     std::cout << obj.first << std::endl;
+    // }
 
     std::unordered_map<std::string, std::set<const SceneObject*>> cluster_objects;
 
@@ -95,14 +95,14 @@ void Scene::render() const {
 
     for (const auto &pair : cluster_objects)
     {
-        std::cout << "Nom de base: " << pair.first << " - Objets: ";
+        //std::cout << "Nom de base: " << pair.first << " - Objets: ";
         int j = 0;
         for (const SceneObject *obj : pair.second)
         {
-            std::cout << "Objet " << j << ": " << std::endl;
+            //std::cout << "Objet " << j << ": " << std::endl;
             j++;
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
 
     // Render every object

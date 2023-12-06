@@ -48,6 +48,7 @@ class Program : NonCopyable {
 
         void set_uniform(u32 name_hash, u32 value);
         void set_uniform(u32 name_hash, float value);
+        void set_uniform(u32 name_hash, bool value);
         void set_uniform(u32 name_hash, glm::vec2 value);
         void set_uniform(u32 name_hash, glm::vec3 value);
         void set_uniform(u32 name_hash, glm::vec4 value);

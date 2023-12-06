@@ -22,9 +22,14 @@ static std::unique_ptr<Scene> scene;
 static float exposure = 1.0;
 static std::vector<std::string> scene_files;
 
+static bool g_buffer_isdepth = false;
+static bool g_buffer_isalbedo = true;
+static bool g_buffer_isnormal = false;
+
 namespace OM3D {
 extern bool audit_bindings_before_draw;
 }
+
 
 void parse_args(int argc, char** argv) {
     for(int i = 1; i < argc; ++i) {
@@ -131,6 +136,25 @@ void gui(ImGuiRenderer& imgui) {
         if(scene && ImGui::BeginMenu("Scene Info")) {
             ImGui::Text("%u objects", u32(scene->objects().size()));
             ImGui::Text("%u point lights", u32(scene->point_lights().size()));
+            ImGui::EndMenu();
+        }
+
+        if(ImGui::BeginMenu("G buffer debug")) {
+            if(ImGui::MenuItem("Detph")) {
+                g_buffer_isdepth = true;
+                g_buffer_isalbedo = false;
+                g_buffer_isnormal = false;
+            }
+            if(ImGui::MenuItem("Albedo")) {
+                g_buffer_isalbedo = true;
+                g_buffer_isdepth = false;
+                g_buffer_isnormal = false;
+            }
+            if(ImGui::MenuItem("Normal")) {
+                g_buffer_isnormal = true;
+                g_buffer_isdepth = false;
+                g_buffer_isalbedo = false;
+            }
             ImGui::EndMenu();
         }
 
@@ -292,7 +316,7 @@ int main(int argc, char** argv) {
 
     scene = create_default_scene();
 
-    auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
+    //auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
     auto g_buffer_program = Program::from_files("debug_g_buffer.frag", "screen.vert");
 
     RendererState renderer;
@@ -341,6 +365,9 @@ int main(int argc, char** argv) {
         {
             renderer.g_buffer_debug.bind();
             g_buffer_program->bind();
+            g_buffer_program->set_uniform(HASH("isdepth"), g_buffer_isdepth);
+            g_buffer_program->set_uniform(HASH("isalbedo"), g_buffer_isalbedo);
+            g_buffer_program->set_uniform(HASH("isnormal"), g_buffer_isnormal);
             renderer.depth_texture.bind(0);
             renderer.g_buffer_albedo.bind(1);
             renderer.g_buffer_normal.bind(2);
