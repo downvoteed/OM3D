@@ -364,7 +364,7 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
         if(node.mesh < 0) {
             continue;
         }
-        std::cout << "obj name: " << node.name << std::endl;
+        //std::cout << "obj name: " << node.name << std::endl;
 
         const tinygltf::Mesh& mesh = gltf.meshes[node.mesh];
 

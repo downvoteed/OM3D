@@ -8,6 +8,8 @@ layout(binding = 0) uniform sampler2D in_depth;
 layout(binding = 1) uniform sampler2D in_albedo_roughness;
 layout(binding = 2) uniform sampler2D in_normal_metallic;
 
+layout(binding = 4) uniform sampler2D in_hdr;
+
 uniform bool isdepth;
 uniform bool isalbedo;
 uniform bool isnormal;
@@ -23,14 +25,15 @@ vec3 reinhard(vec3 x) {
 void main() {
     const ivec2 coord = ivec2(gl_FragCoord.xy);
 
-    vec3 hdr = vec3(0.0);
+    vec3 hdr = vec3(0.5f, 0.7f, 0.8f);
 
     if (isdepth)
-        hdr = texelFetch(in_depth, coord, 0).rgb;
+        hdr = vec3(pow(texelFetch(in_depth, coord, 0).r,0.35));
     if (isalbedo)
         hdr = texelFetch(in_albedo_roughness, coord, 0).rgb;
     if (isnormal)
         hdr = texelFetch(in_normal_metallic, coord, 0).rgb;
+
 
     out_color = vec4(hdr, 1.0);
 }

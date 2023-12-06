@@ -23,7 +23,7 @@ static float exposure = 1.0;
 static std::vector<std::string> scene_files;
 
 static bool g_buffer_isdepth = false;
-static bool g_buffer_isalbedo = true;
+static bool g_buffer_isalbedo = false;
 static bool g_buffer_isnormal = false;
 
 namespace OM3D {
@@ -139,25 +139,58 @@ void gui(ImGuiRenderer& imgui) {
             ImGui::EndMenu();
         }
 
-        if(ImGui::BeginMenu("G buffer debug")) {
-            if(ImGui::MenuItem("Detph")) {
-                g_buffer_isdepth = true;
-                g_buffer_isalbedo = false;
-                g_buffer_isnormal = false;
-            }
-            if(ImGui::MenuItem("Albedo")) {
-                g_buffer_isalbedo = true;
-                g_buffer_isdepth = false;
-                g_buffer_isnormal = false;
-            }
-            if(ImGui::MenuItem("Normal")) {
-                g_buffer_isnormal = true;
-                g_buffer_isdepth = false;
-                g_buffer_isalbedo = false;
+        if(ImGui::BeginMenu("Debug")) 
+        {
+            static const char* current_item = "None";
+            if (ImGui::BeginCombo("Debug mode", current_item))
+            {
+                bool none = (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal);
+                if (ImGui::Selectable("None", none))
+                {
+                    g_buffer_isalbedo = false;
+                    g_buffer_isdepth = false;
+                    g_buffer_isnormal = false;
+                    current_item = "None";
+                }
+                if (none)
+                        ImGui::SetItemDefaultFocus();
+
+                if (ImGui::Selectable("Albedo", g_buffer_isalbedo))
+                {
+                    g_buffer_isalbedo = true;
+                    g_buffer_isdepth = false;
+                    g_buffer_isnormal = false;
+                    current_item = "Albedo";
+                }
+                if (g_buffer_isalbedo)
+                        ImGui::SetItemDefaultFocus();
+
+                if (ImGui::Selectable("Normals", g_buffer_isnormal))
+                {
+                    g_buffer_isalbedo = false;
+                    g_buffer_isdepth = false;
+                    g_buffer_isnormal = true;
+                    current_item = "Normals";
+                }
+                if (g_buffer_isnormal)
+                        ImGui::SetItemDefaultFocus();
+                
+                if (ImGui::Selectable("Depth", g_buffer_isdepth))
+                {
+                    g_buffer_isalbedo = false;
+                    g_buffer_isdepth = true;
+                    g_buffer_isnormal = false;
+                    current_item = "Depth";
+                }
+                if (g_buffer_isdepth)
+                        ImGui::SetItemDefaultFocus();
+
+                ImGui::EndCombo();
             }
             ImGui::EndMenu();
         }
 
+    
         ImGui::Separator();
         ImGui::TextUnformatted(reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
@@ -256,17 +289,20 @@ struct RendererState {
         state.size = size;
 
         if(state.size.x > 0 && state.size.y > 0) {
-            state.depth_texture = Texture(size, ImageFormat::Depth32_FLOAT);
-            state.lit_hdr_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
-            state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
-            state.main_framebuffer = Framebuffer(&state.depth_texture, std::array{&state.lit_hdr_texture});
-            state.tone_map_framebuffer = Framebuffer(nullptr, std::array{&state.tone_mapped_texture});
+            //state.lit_hdr_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
 
+            state.g_buffer_texture = Texture(size, ImageFormat::RGBA8_UNORM);
+            //state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
+
+            //state.main_framebuffer = Framebuffer(&state.depth_texture, std::array{&state.lit_hdr_texture});
+            //state.tone_map_framebuffer = Framebuffer(nullptr, std::array{&state.tone_mapped_texture});
+
+            state.depth_texture = Texture(size, ImageFormat::Depth32_FLOAT);
             state.g_buffer_albedo = Texture(size, ImageFormat::RGBA8_sRGB);
             state.g_buffer_normal = Texture(size, ImageFormat::RGBA8_UNORM);
 
             state.g_buffer = Framebuffer(&state.depth_texture, std::array{&state.g_buffer_albedo, &state.g_buffer_normal});
-            state.g_buffer_debug = Framebuffer(&state.depth_texture, std::array{&state.g_buffer_albedo, &state.g_buffer_normal});
+            state.g_buffer_debug = Framebuffer(nullptr, std::array{&state.g_buffer_texture});
         }
 
         return state;
@@ -274,14 +310,17 @@ struct RendererState {
 
     glm::uvec2 size = {};
 
+    //Texture lit_hdr_texture;
+
+    //Texture tone_mapped_texture;
+    Texture g_buffer_texture;
+
     Texture depth_texture;
-    Texture lit_hdr_texture;
-    Texture tone_mapped_texture;
     Texture g_buffer_albedo;
     Texture g_buffer_normal;
 
-    Framebuffer main_framebuffer;
-    Framebuffer tone_map_framebuffer;
+    //Framebuffer main_framebuffer;
+    //Framebuffer tone_map_framebuffer;
 
     Framebuffer g_buffer;
     Framebuffer g_buffer_debug;
