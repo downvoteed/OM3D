@@ -303,6 +303,9 @@ struct RendererState {
 
             state.g_buffer = Framebuffer(&state.depth_texture, std::array{&state.g_buffer_albedo, &state.g_buffer_normal});
             state.g_buffer_debug = Framebuffer(nullptr, std::array{&state.g_buffer_texture});
+
+            state.lights_texture = Texture(size, ImageFormat::RGBA8_UNORM);
+            state.sun_light = Framebuffer(nullptr, std::array{&state.lights_texture});
         }
 
         return state;
@@ -324,6 +327,9 @@ struct RendererState {
 
     Framebuffer g_buffer;
     Framebuffer g_buffer_debug;
+
+    Framebuffer sun_light;
+    Texture lights_texture;
 };
 
 
@@ -357,6 +363,7 @@ int main(int argc, char** argv) {
 
     //auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
     auto g_buffer_program = Program::from_files("debug_g_buffer.frag", "screen.vert");
+    auto lights_program = Program::from_files("sun.frag", "screen.vert");
 
     RendererState renderer;
 
@@ -400,7 +407,16 @@ int main(int argc, char** argv) {
         //     renderer.lit_hdr_texture.bind(0);
         //     glDrawArrays(GL_TRIANGLES, 0, 3);
         // }
-
+        if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
+        {
+            renderer.sun_light.bind();
+            lights_program->bind();
+            renderer.depth_texture.bind(0);
+            renderer.g_buffer_albedo.bind(1);
+            renderer.g_buffer_normal.bind(2);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
+        else
         {
             renderer.g_buffer_debug.bind();
             g_buffer_program->bind();
@@ -416,7 +432,10 @@ int main(int argc, char** argv) {
         // Blit tonemap result to screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //renderer.tone_map_framebuffer.blit();
-        renderer.g_buffer_debug.blit();
+        if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
+            renderer.sun_light.blit();
+        else
+            renderer.g_buffer_debug.blit();
 
         gui(imgui);
 
