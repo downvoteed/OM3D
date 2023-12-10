@@ -292,10 +292,10 @@ struct RendererState {
             //state.lit_hdr_texture = Texture(size, ImageFormat::RGBA16_FLOAT);
 
             state.g_buffer_texture = Texture(size, ImageFormat::RGBA8_UNORM);
-            //state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
+            state.tone_mapped_texture = Texture(size, ImageFormat::RGBA8_UNORM);
 
             //state.main_framebuffer = Framebuffer(&state.depth_texture, std::array{&state.lit_hdr_texture});
-            //state.tone_map_framebuffer = Framebuffer(nullptr, std::array{&state.tone_mapped_texture});
+            state.tone_map_framebuffer = Framebuffer(nullptr, std::array{&state.tone_mapped_texture});
 
             state.depth_texture = Texture(size, ImageFormat::Depth32_FLOAT);
             state.g_buffer_albedo = Texture(size, ImageFormat::RGBA8_sRGB);
@@ -315,7 +315,7 @@ struct RendererState {
 
     //Texture lit_hdr_texture;
 
-    //Texture tone_mapped_texture;
+    Texture tone_mapped_texture;
     Texture g_buffer_texture;
 
     Texture depth_texture;
@@ -323,7 +323,7 @@ struct RendererState {
     Texture g_buffer_normal;
 
     //Framebuffer main_framebuffer;
-    //Framebuffer tone_map_framebuffer;
+    Framebuffer tone_map_framebuffer;
 
     Framebuffer g_buffer;
     Framebuffer g_buffer_debug;
@@ -361,7 +361,7 @@ int main(int argc, char** argv) {
 
     scene = create_default_scene();
 
-    //auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
+    auto tonemap_program = Program::from_files("tonemap.frag", "screen.vert");
     auto g_buffer_program = Program::from_files("debug_g_buffer.frag", "screen.vert");
     auto lights_program = Program::from_files("sun.frag", "screen.vert");
 
@@ -415,6 +415,12 @@ int main(int argc, char** argv) {
             renderer.g_buffer_albedo.bind(1);
             renderer.g_buffer_normal.bind(2);
             glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            renderer.tone_map_framebuffer.bind();
+            tonemap_program->bind();
+            tonemap_program->set_uniform(HASH("exposure"), exposure);
+            renderer.lights_texture.bind(0);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
         }
         else
         {
@@ -433,7 +439,10 @@ int main(int argc, char** argv) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //renderer.tone_map_framebuffer.blit();
         if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
-            renderer.sun_light.blit();
+        {
+            //renderer.sun_light.blit();
+            renderer.tone_map_framebuffer.blit();
+        }
         else
             renderer.g_buffer_debug.blit();
 
