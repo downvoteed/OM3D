@@ -41,7 +41,9 @@ void Scene::set_sun(glm::vec3 direction, glm::vec3 color) {
     _sun_color = color;
 }
 
-void Scene::render() const {
+void Scene::renderLights() const
+{
+    std::cout << "Rendering lights" << std::endl;
     // Fill and bind frame data buffer
     TypedBuffer<shader::FrameData> buffer(nullptr, 1);
     {
@@ -50,6 +52,8 @@ void Scene::render() const {
         mapping[0].point_light_count = u32(_point_lights.size());
         mapping[0].sun_color = _sun_color;
         mapping[0].sun_dir = glm::normalize(_sun_direction);
+
+        std::cout << "Sun dir: " << mapping[0].sun_dir.x << " " << mapping[0].sun_dir.y << " " << mapping[0].sun_dir.z << std::endl;
     }
     buffer.bind(BufferUsage::Uniform, 0);
 
@@ -68,6 +72,10 @@ void Scene::render() const {
         }
     }
     light_buffer.bind(BufferUsage::Storage, 1);
+
+}
+
+void Scene::render() const {
 
     // for (const auto& obj: this->_obj_name_to_index)
     // {
@@ -104,6 +112,14 @@ void Scene::render() const {
         }
         //std::cout << std::endl;
     }
+
+    // Fill and bind frame data buffer
+    TypedBuffer<shader::FrameData> buffer(nullptr, 1);
+    {
+        auto mapping = buffer.map(AccessType::WriteOnly);
+        mapping[0].camera.view_proj = _camera.view_proj_matrix();
+    }
+    buffer.bind(BufferUsage::Uniform, 0);
 
     // Render every object
     for (const SceneObject &obj : _objects)

@@ -257,7 +257,7 @@ std::unique_ptr<Scene> create_default_scene() {
     auto scene = std::make_unique<Scene>();
 
     // Load default cube model
-    auto result = Scene::from_gltf(std::string(data_path) + "forest.glb");
+    auto result = Scene::from_gltf(std::string(data_path) + "bistro_lights.glb");
     ALWAYS_ASSERT(result.is_ok, "Unable to load default scene");
     scene = std::move(result.value);
 
@@ -393,6 +393,7 @@ int main(int argc, char** argv) {
         // Render the scene
         {
             //renderer.main_framebuffer.bind();
+            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "g_buffer");
             renderer.g_buffer.bind();
             scene->render();
         }
@@ -409,13 +410,15 @@ int main(int argc, char** argv) {
         // }
         if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
         {
-            renderer.sun_light.bind();
+            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "1 2 3 Soleil");
+            renderer.sun_light.bind(false);
             lights_program->bind();
-            renderer.depth_texture.bind(0);
-            renderer.g_buffer_albedo.bind(1);
-            renderer.g_buffer_normal.bind(2);
+            scene->renderLights();
+            renderer.g_buffer_albedo.bind(0);
+            renderer.g_buffer_normal.bind(1);
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
+            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Tone Map");
             renderer.tone_map_framebuffer.bind();
             tonemap_program->bind();
             tonemap_program->set_uniform(HASH("exposure"), exposure);
@@ -440,8 +443,8 @@ int main(int argc, char** argv) {
         //renderer.tone_map_framebuffer.blit();
         if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
         {
-            //renderer.sun_light.blit();
-            renderer.tone_map_framebuffer.blit();
+            renderer.sun_light.blit();
+            //renderer.tone_map_framebuffer.blit();
         }
         else
             renderer.g_buffer_debug.blit();

@@ -19,11 +19,6 @@ layout(location = 5) in vec3 in_bitangent;
 layout(binding = 0) uniform sampler2D in_texture;
 layout(binding = 1) uniform sampler2D in_normal_texture;
 
-layout(binding = 0) uniform Data {
-    FrameData frame;
-};
-
-
 
 void main() {
 #ifdef NORMAL_MAPPED
