@@ -26,7 +26,7 @@ void main() {
 
     vec3 acc = frame.sun_color * max(0.0, dot(frame.sun_dir, normalizedNormal)) + ambient;
 
-    vec3 color = albedo * acc * 2.0;
+    vec3 color = albedo * acc;
 
     out_color = vec4(color, 1.0);
 }

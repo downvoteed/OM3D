@@ -112,6 +112,7 @@ void process_inputs(GLFWwindow* window, Camera& camera) {
 
 void gui(ImGuiRenderer& imgui) {
     imgui.start();
+
     DEFER(imgui.finish());
 
     // ImGui::ShowDemoWindow();
@@ -396,30 +397,21 @@ int main(int argc, char** argv) {
             glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "g_buffer");
             renderer.g_buffer.bind();
             scene->render();
+            glPopDebugGroup();
         }
         glDisable(GL_CULL_FACE);
 
-        // Apply a tonemap in compute shader
-        //FIXME: TP3
-        // {
-        //     renderer.tone_map_framebuffer.bind();
-        //     tonemap_program->bind();
-        //     tonemap_program->set_uniform(HASH("exposure"), exposure);
-        //     renderer.lit_hdr_texture.bind(0);
-        //     glDrawArrays(GL_TRIANGLES, 0, 3);
-        // }
         if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
         {
             {
-                glPopDebugGroup();
                 glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "1 2 3 Soleil");
                 renderer.sun_light.bind(false);
                 lights_program->bind();
                 renderer.g_buffer_albedo.bind(0);
                 renderer.g_buffer_normal.bind(1);
                 scene->renderLights();
-
                 glPopDebugGroup();
+
                 glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 2, -1, "Tone Map");
                 glPopDebugGroup();
                 renderer.tone_map_framebuffer.bind();
@@ -444,11 +436,11 @@ int main(int argc, char** argv) {
 
         // Blit tonemap result to screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // renderer.tone_map_framebuffer.blit();
+        renderer.tone_map_framebuffer.blit();
         if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
         {
             renderer.sun_light.blit();
-            // renderer.tone_map_framebuffer.blit();
+            renderer.tone_map_framebuffer.blit();
         }
         else
             renderer.g_buffer_debug.blit();

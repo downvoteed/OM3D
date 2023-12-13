@@ -12,6 +12,9 @@
 #define TINYGLTF_NOEXCEPTION
 #include <tinygltf/tiny_gltf.h>
 
+
+bool is_true = true;
+
 namespace OM3D {
 
 bool display_gltf_loading_warnings = false;
@@ -444,8 +447,47 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
         }
     }
 
-    for(auto [node_index, light_index] : light_nodes) {
-        const auto& gltf_light = gltf.lights[light_index];
+    // Mesh. Load sphere.glb and add it to the scene
+
+    std::string err;
+    std::string warn;
+
+
+    for (auto [node_index, light_index] : light_nodes)
+    {
+        const auto &gltf_light = gltf.lights[light_index];
+
+        tinygltf::Model sphereModel;
+        if (!ctx.LoadBinaryFromFile(&sphereModel, &err, &warn, "../../data/sphere.glb"))
+        {
+            std::cerr << "Failed to load sphere model: " << err << std::endl;
+            return {false, {}};
+        }
+
+        // Assurez-vous que le modèle de la sphère a au moins une primitive
+        if (sphereModel.meshes.empty() || sphereModel.meshes[0].primitives.empty())
+        {
+            std::cerr << "Sphere model is not valid" << std::endl;
+            return {false, {}};
+        }
+
+        const tinygltf::Primitive &spherePrim = sphereModel.meshes[0].primitives[0];
+        auto sphereMesh = build_mesh_data(sphereModel, spherePrim);
+        if (!sphereMesh.is_ok)
+        {
+            return {false, {}};
+        }
+        Material material = Material::textured_lights();
+        material.set_blend_mode(BlendMode::Additive);
+        material.set_depth_test_mode(DepthTestMode::Standard);
+        material.set_cull_mode(CullMode::Front);
+
+        auto scene_object = SceneObject(std::make_shared<StaticMesh>(sphereMesh.value), std::make_shared<Material>(material));
+
+        scene_object.set_transform(node_transforms[node_index]);
+        scene->add_object(std::move(scene_object));
+
+        is_true = false;
 
         const glm::vec3 color = glm::vec3(float(gltf_light.color[0]), float(gltf_light.color[1]), float(gltf_light.color[2])) * float(gltf_light.intensity);;
 
@@ -459,8 +501,9 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
             light.set_radius(std::sqrt(intensity * 1000.0f)); // Put radius where lum < 0.1%
         }
         scene->add_light(light);
-    }
 
+        // create Light sphere
+    }
 
     return {true, std::move(scene)};
 }

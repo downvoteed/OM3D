@@ -21,7 +21,7 @@ class Scene : NonMovable {
         void render() const;
         void renderLights() const;
 
-            void add_object(SceneObject obj);
+        void add_object(SceneObject obj);
         void add_light(PointLight obj);
 
         Span<const SceneObject> objects() const;

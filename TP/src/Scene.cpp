@@ -44,7 +44,6 @@ void Scene::set_sun(glm::vec3 direction, glm::vec3 color) {
 
 void Scene::renderLights() const
 {
-    std::cout << "Rendering lights" << std::endl;
     // Fill and bind frame data buffer
     TypedBuffer<shader::FrameData> buffer(nullptr, 1);
     {
@@ -53,8 +52,6 @@ void Scene::renderLights() const
         mapping[0].point_light_count = u32(_point_lights.size());
         mapping[0].sun_color = _sun_color;
         mapping[0].sun_dir = glm::normalize(_sun_direction);
-
-        std::cout << "Sun dir: " << mapping[0].sun_dir.x << " " << mapping[0].sun_dir.y << " " << mapping[0].sun_dir.z << std::endl;
     }
     buffer.bind(BufferUsage::Uniform, 0);
     glDrawArrays(GL_TRIANGLES, 0, 3);

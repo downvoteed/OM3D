@@ -62,6 +62,14 @@ void Material::bind() const {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         break;
+
+        case BlendMode::Additive:
+            // do not write in the depth buffer
+            // TODO: frontface culling
+            glDepthMask(GL_FALSE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
     }
 
     switch(_depth_test_mode) {
@@ -107,6 +115,12 @@ std::shared_ptr<Material> Material::empty_material() {
 Material Material::textured_material() {
     Material material;
     material._program = Program::from_files("g_buffer.frag", "basic.vert", {"TEXTURED"});
+    return material;
+}
+
+Material Material::textured_lights() {
+    Material material;
+    material._program = Program::from_files("lights.frag", "screen.vert", {"TEXTURED"});
     return material;
 }
 
