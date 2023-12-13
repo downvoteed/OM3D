@@ -257,7 +257,7 @@ std::unique_ptr<Scene> create_default_scene() {
     auto scene = std::make_unique<Scene>();
 
     // Load default cube model
-    auto result = Scene::from_gltf(std::string(data_path) + "bistro_lights.glb");
+    auto result = Scene::from_gltf(std::string(data_path) + "forest.glb");
     ALWAYS_ASSERT(result.is_ok, "Unable to load default scene");
     scene = std::move(result.value);
 
@@ -410,20 +410,24 @@ int main(int argc, char** argv) {
         // }
         if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
         {
-            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "1 2 3 Soleil");
-            renderer.sun_light.bind(false);
-            lights_program->bind();
-            scene->renderLights();
-            renderer.g_buffer_albedo.bind(0);
-            renderer.g_buffer_normal.bind(1);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+            {
+                glPopDebugGroup();
+                glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "1 2 3 Soleil");
+                renderer.sun_light.bind(false);
+                lights_program->bind();
+                renderer.g_buffer_albedo.bind(0);
+                renderer.g_buffer_normal.bind(1);
+                scene->renderLights();
 
-            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Tone Map");
-            renderer.tone_map_framebuffer.bind();
-            tonemap_program->bind();
-            tonemap_program->set_uniform(HASH("exposure"), exposure);
-            renderer.lights_texture.bind(0);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+                glPopDebugGroup();
+                glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 2, -1, "Tone Map");
+                glPopDebugGroup();
+                renderer.tone_map_framebuffer.bind();
+                tonemap_program->bind();
+                tonemap_program->set_uniform(HASH("exposure"), exposure);
+                renderer.lights_texture.bind(0);
+                glDrawArrays(GL_TRIANGLES, 0, 3);
+            }
         }
         else
         {
@@ -440,11 +444,11 @@ int main(int argc, char** argv) {
 
         // Blit tonemap result to screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //renderer.tone_map_framebuffer.blit();
+        // renderer.tone_map_framebuffer.blit();
         if (!g_buffer_isdepth && !g_buffer_isalbedo && !g_buffer_isnormal)
         {
             renderer.sun_light.blit();
-            //renderer.tone_map_framebuffer.blit();
+            // renderer.tone_map_framebuffer.blit();
         }
         else
             renderer.g_buffer_debug.blit();
@@ -452,7 +456,6 @@ int main(int argc, char** argv) {
         gui(imgui);
 
         glfwSwapBuffers(window);
-
     }
 
     scene = nullptr; // destroy scene and child OpenGL objects

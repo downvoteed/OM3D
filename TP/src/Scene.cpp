@@ -1,6 +1,7 @@
 #include "Scene.h"
 
 #include <TypedBuffer.h>
+#include <glad/glad.h>
 
 #include <shader_structs.h>
 #include <iostream>
@@ -56,6 +57,7 @@ void Scene::renderLights() const
         std::cout << "Sun dir: " << mapping[0].sun_dir.x << " " << mapping[0].sun_dir.y << " " << mapping[0].sun_dir.z << std::endl;
     }
     buffer.bind(BufferUsage::Uniform, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
     // Fill and bind lights buffer
     TypedBuffer<shader::PointLight> light_buffer(nullptr, std::max(_point_lights.size(), size_t(1)));
@@ -125,7 +127,6 @@ void Scene::render() const {
     for (const SceneObject &obj : _objects)
     {
         Frustum frustum = this->_camera.build_frustum();
-
 
         bool is_in_frustum = this->_camera.isInside(obj, frustum);
 

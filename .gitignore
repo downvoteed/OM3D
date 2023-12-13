@@ -1,3 +1,5 @@
 TP/build/
 TP/.vscode
+TP/data/bistro_lights.glb
+*.rdc
 *.user
