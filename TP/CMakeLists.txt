@@ -12,7 +12,7 @@ endif()
 
 
 # setup external libraries
-add_subdirectory(external/glfw)
+#add_subdirectory(external/glfw)
 add_subdirectory(external/glm)
 
 include_directories(external/glfw/include)

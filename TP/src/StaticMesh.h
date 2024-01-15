@@ -6,9 +6,31 @@
 #include <Vertex.h>
 #include <math.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <vector>
 
 namespace OM3D {
+
+class Skeleton {
+    public:
+        Skeleton() = default;
+        Skeleton(glm::mat4 inverseBindMatrix, std::vector<int> joints):
+            _inverseBindMatrix(inverseBindMatrix),
+            _joints(joints)
+        {}
+        void set_inverse_bind_matrix(const glm::mat4& ibm);
+        const glm::mat4& inverse_bind_matrix() const;
+
+        void add_joint(int joint);
+        void set_joints(const std::vector<int>& joints);
+        const std::vector<int>& joints() const;
+
+    private:
+        glm::mat4 _inverseBindMatrix = glm::mat4(1.0f);
+        std::vector<int> _joints;
+        
+};
 
 struct MeshData {
     std::vector<Vertex> vertices;
@@ -79,10 +101,15 @@ class StaticMesh : NonCopyable {
 
         void draw() const;
 
+        const Skeleton& get_skeleton() const;
+        void set_skeleton(const Skeleton& skel);
+
         private:
             TypedBuffer<Vertex> _vertex_buffer;
             TypedBuffer<u32> _index_buffer;
             Sphere _bounding_sphere;
+
+            Skeleton _skeleton;
         };
 }
 

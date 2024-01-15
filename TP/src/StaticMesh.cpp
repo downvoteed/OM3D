@@ -6,6 +6,27 @@ namespace OM3D {
 
 extern bool audit_bindings_before_draw;
 
+void Skeleton::set_inverse_bind_matrix(const glm::mat4& ibm) {
+    _inverseBindMatrix = ibm;
+}
+
+const glm::mat4& Skeleton::inverse_bind_matrix() const {
+    return _inverseBindMatrix;
+}
+
+void Skeleton::add_joint(int joint) {
+    _joints.push_back(joint);
+}
+
+void Skeleton::set_joints(const std::vector<int>& joints) {
+    _joints = joints;
+}
+
+const std::vector<int>& Skeleton::joints() const {
+    return _joints;
+}
+
+
 
 StaticMesh::StaticMesh(const MeshData& data) :
     _vertex_buffer(data.vertices),
@@ -34,12 +55,18 @@ void StaticMesh::draw() const {
     glVertexAttribPointer(3, 4, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(8 * sizeof(float)));
     // Vertex color
     glVertexAttribPointer(4, 3, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(12 * sizeof(float)));
+    // Vertex joints (UINT)
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_INT, false, sizeof(Vertex), reinterpret_cast<void*>(15 * sizeof(uint)));
+    // Vertex weights
+    glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(19 * sizeof(float)));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
+    glEnableVertexAttribArray(6);
 
     if(audit_bindings_before_draw) {
         audit_bindings();
@@ -47,6 +74,14 @@ void StaticMesh::draw() const {
 
 
     glDrawElements(GL_TRIANGLES, int(_index_buffer.element_count()), GL_UNSIGNED_INT, nullptr);
+}
+
+void StaticMesh::set_skeleton(const Skeleton& skel) {
+    _skeleton = skel;
+}
+
+const Skeleton& StaticMesh::get_skeleton() const {
+    return _skeleton;
 }
 
 }

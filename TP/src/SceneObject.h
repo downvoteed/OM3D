@@ -6,6 +6,7 @@
 
 #include <memory>
 
+
 #include <glm/matrix.hpp>
 
 namespace OM3D {

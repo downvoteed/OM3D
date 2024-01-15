@@ -2,6 +2,7 @@
 #include "StaticMesh.h"
 
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <utils.h>
 
@@ -32,15 +33,16 @@ static size_t component_count(int type) {
     }
 }
 
-static bool decode_attrib_buffer(const tinygltf::Model& gltf, const std::string& name, const tinygltf::Accessor& accessor, Span<Vertex> vertices) {
+static bool decode_attrib_buffer(const tinygltf::Model& gltf, const std::string& name, tinygltf::Accessor& accessor, Span<Vertex> vertices) {
     const tinygltf::BufferView& buffer = gltf.bufferViews[accessor.bufferView];
 
-    if(accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        if(display_gltf_loading_warnings) {
-            std::cerr << "Unsupported component type (" << accessor.componentType << ") for \"" << name << "\"" << std::endl;
-        }
-        return false;
-    }
+    // if(accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+    //     if(display_gltf_loading_warnings) {
+    //         std::cerr << "Unsupported component type (" << accessor.componentType << ") for \"" << name << "\"" << std::endl;
+    //     }
+    //     std::cout << accessor.componentType << "\n";
+    //     return false;
+    // }
 
     [[maybe_unused]]
     const size_t vertex_count = vertices.size();
@@ -106,6 +108,22 @@ static bool decode_attrib_buffer(const tinygltf::Model& gltf, const std::string&
         decode_attribs(&vertices[0].uv);
     } else if(name == "COLOR_0") {
         decode_attribs(&vertices[0].color);
+    } else if(name == "JOINTS_0") {
+        decode_attribs(&vertices[0].joints_0);
+
+        std::cout << "JOINTS_0 = " << std::endl;
+        for (int i = 0; i < vertices.size(); i++)
+        {
+            std::cout << vertices[i].joints_0[0] << " " << vertices[i].joints_0[1] << " " << vertices[i].joints_0[2] << " " << vertices[i].joints_0[3] << std::endl;
+        }
+    } else if(name == "WEIGHTS_0") {
+        decode_attribs(&vertices[0].weights_0);
+
+        std::cout << "WEIGHTS_0 = " << std::endl;
+        for (int i = 0; i < vertices.size(); i++)
+        {
+            std::cout << vertices[i].weights_0[0] << " " << vertices[i].weights_0[1] << " " << vertices[i].weights_0[2] << " " << vertices[i].weights_0[3] << std::endl;
+        }
     } else {
         if(display_gltf_loading_warnings) {
             std::cerr << "Attribute \"" << name << "\" is not supported" << std::endl;
@@ -321,6 +339,7 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
         }
 
         if(!ok) {
+            std::cout << "Failed to parse glTF\n";
             return {false, {}};
         }
     }
@@ -440,7 +459,46 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
                 material = mat;
             }
 
-            auto scene_object = SceneObject(std::make_shared<StaticMesh>(mesh.value), std::move(material));
+            std::shared_ptr<StaticMesh> static_mesh = std::make_shared<StaticMesh>(mesh.value);
+            
+            if (gltf.skins.size() > 0) 
+            {
+                const tinygltf::Skin &skin = gltf.skins[0];
+
+                if (skin.joints.size() > 0) 
+                {
+                    const tinygltf::Accessor &accessor = gltf.accessors[skin.inverseBindMatrices];
+                    assert(accessor.type == TINYGLTF_TYPE_MAT4);
+
+                    const tinygltf::BufferView &bufferView = gltf.bufferViews[accessor.bufferView];
+
+                    const tinygltf::Buffer &buffer = gltf.buffers[bufferView.buffer];
+
+                    const float *ptr = reinterpret_cast<const float *>(buffer.data.data() + accessor.byteOffset + bufferView.byteOffset);
+
+                    glm::mat4 inverse_bind_matrices;
+
+                    glm::mat4 m;
+                    memcpy(glm::value_ptr(m), ptr + j * 16, 16 * sizeof(float));
+                    inverse_bind_matrices = m;
+
+                    //print inverse_bind_matrices
+                    std::cout << "inverse_bind_matrices = " << std::endl;
+                    for (int i = 0; i < 4; i++) 
+                    {
+                        for (int j = 0; j < 4; j++) 
+                        {
+                            std::cout << inverse_bind_matrices[i][j] << " ";
+                        }
+                        std::cout << std::endl;
+                    }                    
+
+                    std::cout << "num joints = " << skin.joints.size() << std::endl;
+                    static_mesh->set_skeleton(Skeleton(inverse_bind_matrices, skin.joints));
+                }
+            }
+
+            auto scene_object = SceneObject(static_mesh, std::move(material));
             scene_object.set_transform(node_transform);
             scene->add_object(std::move(scene_object));
             scene->_obj_name_to_index[node.name] = node_index;
