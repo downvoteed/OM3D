@@ -15,20 +15,20 @@ namespace OM3D {
 class Skeleton {
     public:
         Skeleton() = default;
-        Skeleton(glm::mat4 inverseBindMatrix, std::vector<int> joints):
+        Skeleton(glm::mat4 inverseBindMatrix, std::vector<glm::mat4> joints):
             _inverseBindMatrix(inverseBindMatrix),
             _joints(joints)
         {}
         void set_inverse_bind_matrix(const glm::mat4& ibm);
         const glm::mat4& inverse_bind_matrix() const;
 
-        void add_joint(int joint);
-        void set_joints(const std::vector<int>& joints);
-        const std::vector<int>& joints() const;
+        void add_joint(glm::mat4 joint);
+        void set_joints(const std::vector<glm::mat4>& joints);
+        const std::vector<glm::mat4>& joints() const;
 
     private:
         glm::mat4 _inverseBindMatrix = glm::mat4(1.0f);
-        std::vector<int> _joints;
+        std::vector<glm::mat4> _joints;
         
 };
 

@@ -33,6 +33,119 @@ static size_t component_count(int type) {
     }
 }
 
+static bool decode_index_buffer(const tinygltf::Model& gltf, const tinygltf::Accessor& accessor, Span<u32> indices) {
+    const tinygltf::BufferView& buffer = gltf.bufferViews[accessor.bufferView];
+
+    auto decode_indices = [&](u32 elem_size, auto convert_index) {
+        const u8* in_buffer = gltf.buffers[buffer.buffer].data.data() + buffer.byteOffset + accessor.byteOffset;
+        const size_t input_stride = buffer.byteStride ? buffer.byteStride : elem_size;
+
+        for(size_t i = 0; i != accessor.count; ++i) {
+            indices[i] = convert_index(in_buffer + i * input_stride);
+        }
+    };
+
+    switch(accessor.componentType) {
+        case TINYGLTF_PARAMETER_TYPE_BYTE:
+        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE:
+            decode_indices(1, [](const u8* data) -> u32 { return *data; });
+        break;
+
+        case TINYGLTF_PARAMETER_TYPE_SHORT:
+        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT:
+            decode_indices(2, [](const u8* data) -> u32 { return *reinterpret_cast<const u16*>(data); });
+        break;
+
+        case TINYGLTF_PARAMETER_TYPE_INT:
+        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT:
+            decode_indices(4, [](const u8* data) -> u32 { return *reinterpret_cast<const u32*>(data); });
+        break;
+
+        default:
+            std::cerr << "Index component type not supported" << std::endl;
+            return false;
+    }
+
+    return true;
+}
+
+/* static int GetAccessorType (tinygltf::Accessor& accessor)
+{
+    switch (accessor.componentType)
+            {
+            case TINYGLTF_COMPONENT_TYPE_BYTE:
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+                return 1;
+                break;
+            case TINYGLTF_COMPONENT_TYPE_SHORT:
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+                return 2;
+                break;
+            case TINYGLTF_COMPONENT_TYPE_INT:
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+                return 4;
+                break;
+            case TINYGLTF_COMPONENT_TYPE_FLOAT:
+                return 4;
+                break;
+            default:
+                std::cerr << "Unsupported data component type in gltf model!";
+                break;
+            }
+}
+
+ static glm::vec<4, int> ReadIntegerElement (u8 const *SrcData, tinygltf::Accessor& accessor, size_t const NumComponents)
+{
+    glm::vec<4, int> Result{};
+    int type = GetAccessorType(accessor);
+
+    for (size_t Component = 0; Component < NumComponents; ++Component)
+    {
+        size_t ComponentOffset = Component * type;
+
+        switch (type) // can be 1, 2 or 4 bytes
+        {
+        case 1:
+            Result[static_cast<glm::vec<4, int>::length_type>(Component)] =
+                *(reinterpret_cast<u8 const *>(SrcData + ComponentOffset));
+            break;
+        case 2:
+            Result[static_cast<glm::vec<4, int>::length_type>(Component)] =
+                *(reinterpret_cast<u16 const *>(SrcData + ComponentOffset));
+            break;
+        case 4:
+            Result[static_cast<glm::vec<4, int>::length_type>(Component)] =
+                *(reinterpret_cast<u32 const *>(SrcData + ComponentOffset));
+            break;
+        }
+    }
+
+    return Result;
+}
+
+static void WriteIntegerElement(glm::vec<4, int> const &SrcData, size_t const NumComponents, u8 *DstData)
+{
+    switch (NumComponents)
+    {
+    case 1:
+        *(reinterpret_cast<u32 *>(DstData)) = SrcData[0];
+        break;
+    case 2:
+        *(reinterpret_cast<glm::vec<2, int> *>(DstData)) = glm::vec<4, int>{SrcData};
+        break;
+    case 3:
+        *(reinterpret_cast<glm::vec<3, int> *>(DstData)) = glm::vec<3, int>{SrcData};
+        break;
+    case 4:
+        *(reinterpret_cast<glm::vec<4, int> *>(DstData)) = SrcData;
+        break;
+    default:
+        std::cerr << "Invalid number of element components!";
+        break;
+    }
+} */
+
+
 static bool decode_attrib_buffer(const tinygltf::Model& gltf, const std::string& name, tinygltf::Accessor& accessor, Span<Vertex> vertices) {
     const tinygltf::BufferView& buffer = gltf.bufferViews[accessor.bufferView];
 
@@ -87,10 +200,18 @@ static bool decode_attrib_buffer(const tinygltf::Model& gltf, const std::string&
 
             const auto& in_buffer = gltf.buffers[buffer.buffer].data;
             const u8* in_begin = in_buffer.data() + buffer.byteOffset + accessor.byteOffset;
-            const size_t attrib_size = components * sizeof(value_type);
+
+            size_t attrib_size = components * sizeof(value_type);
             const size_t input_stride = buffer.byteStride ? buffer.byteStride : attrib_size;
 
             for(size_t i = 0; i != accessor.count; ++i) {
+
+                /* if (name == "JOINT_0")
+                {
+                    glm::vec<4, int> joints = ReadIntegerElement(in_begin + i * input_stride , accessor, components);
+                    WriteIntegerElement(joints, components, out_begin + i * sizeof(Vertex));
+                }
+                else */
                 const u8* attrib = in_begin + i * input_stride;
                 DEBUG_ASSERT(attrib < in_buffer.data() + in_buffer.size());
                 *reinterpret_cast<attrib_type*>(out_begin + i * sizeof(Vertex)) = convert(attrib);
@@ -110,20 +231,8 @@ static bool decode_attrib_buffer(const tinygltf::Model& gltf, const std::string&
         decode_attribs(&vertices[0].color);
     } else if(name == "JOINTS_0") {
         decode_attribs(&vertices[0].joints_0);
-
-        std::cout << "JOINTS_0 = " << std::endl;
-        for (int i = 0; i < vertices.size(); i++)
-        {
-            std::cout << vertices[i].joints_0[0] << " " << vertices[i].joints_0[1] << " " << vertices[i].joints_0[2] << " " << vertices[i].joints_0[3] << std::endl;
-        }
     } else if(name == "WEIGHTS_0") {
         decode_attribs(&vertices[0].weights_0);
-
-        std::cout << "WEIGHTS_0 = " << std::endl;
-        for (int i = 0; i < vertices.size(); i++)
-        {
-            std::cout << vertices[i].weights_0[0] << " " << vertices[i].weights_0[1] << " " << vertices[i].weights_0[2] << " " << vertices[i].weights_0[3] << std::endl;
-        }
     } else {
         if(display_gltf_loading_warnings) {
             std::cerr << "Attribute \"" << name << "\" is not supported" << std::endl;
@@ -132,41 +241,6 @@ static bool decode_attrib_buffer(const tinygltf::Model& gltf, const std::string&
     return true;
 }
 
-static bool decode_index_buffer(const tinygltf::Model& gltf, const tinygltf::Accessor& accessor, Span<u32> indices) {
-    const tinygltf::BufferView& buffer = gltf.bufferViews[accessor.bufferView];
-
-    auto decode_indices = [&](u32 elem_size, auto convert_index) {
-        const u8* in_buffer = gltf.buffers[buffer.buffer].data.data() + buffer.byteOffset + accessor.byteOffset;
-        const size_t input_stride = buffer.byteStride ? buffer.byteStride : elem_size;
-
-        for(size_t i = 0; i != accessor.count; ++i) {
-            indices[i] = convert_index(in_buffer + i * input_stride);
-        }
-    };
-
-    switch(accessor.componentType) {
-        case TINYGLTF_PARAMETER_TYPE_BYTE:
-        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE:
-            decode_indices(1, [](const u8* data) -> u32 { return *data; });
-        break;
-
-        case TINYGLTF_PARAMETER_TYPE_SHORT:
-        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT:
-            decode_indices(2, [](const u8* data) -> u32 { return *reinterpret_cast<const u16*>(data); });
-        break;
-
-        case TINYGLTF_PARAMETER_TYPE_INT:
-        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT:
-            decode_indices(4, [](const u8* data) -> u32 { return *reinterpret_cast<const u32*>(data); });
-        break;
-
-        default:
-            std::cerr << "Index component type not supported" << std::endl;
-            return false;
-    }
-
-    return true;
-}
 
 static Result<MeshData> build_mesh_data(const tinygltf::Model& gltf, const tinygltf::Primitive& prim) {
     std::vector<Vertex> vertices;
@@ -494,7 +568,17 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
                     }                    
 
                     std::cout << "num joints = " << skin.joints.size() << std::endl;
-                    static_mesh->set_skeleton(Skeleton(inverse_bind_matrices, skin.joints));
+                    // each joint is an index which is the index of the node in the gltf.nodes array
+                    std::vector<glm::mat4> joint_matrices;
+                    for (int i = 0; i < skin.joints.size(); i++) 
+                    {
+                        const glm::mat4 global_node_tranform = node_transforms[skin.joints[i]];
+                        glm::mat4 inverse_joint_node_tranform = glm::inverse(global_node_tranform);
+                        glm::mat4 joint_transform = global_node_tranform * inverse_bind_matrices;
+                        joint_matrices.push_back(inverse_joint_node_tranform * joint_transform); // * inverse_bind_matrices ?
+                    }
+
+                    static_mesh->set_skeleton(Skeleton(inverse_bind_matrices, joint_matrices));
                 }
             }
 

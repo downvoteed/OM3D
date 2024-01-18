@@ -14,15 +14,15 @@ const glm::mat4& Skeleton::inverse_bind_matrix() const {
     return _inverseBindMatrix;
 }
 
-void Skeleton::add_joint(int joint) {
+void Skeleton::add_joint(glm::mat4 joint) {
     _joints.push_back(joint);
 }
 
-void Skeleton::set_joints(const std::vector<int>& joints) {
+void Skeleton::set_joints(const std::vector<glm::mat4>& joints) {
     _joints = joints;
 }
 
-const std::vector<int>& Skeleton::joints() const {
+const std::vector<glm::mat4>& Skeleton::joints() const {
     return _joints;
 }
 
@@ -56,7 +56,7 @@ void StaticMesh::draw() const {
     // Vertex color
     glVertexAttribPointer(4, 3, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(12 * sizeof(float)));
     // Vertex joints (UINT)
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_INT, false, sizeof(Vertex), reinterpret_cast<void*>(15 * sizeof(uint)));
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, false, sizeof(Vertex), reinterpret_cast<void*>(15 * sizeof(uint8_t)));
     // Vertex weights
     glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(19 * sizeof(float)));
 

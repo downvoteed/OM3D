@@ -23,11 +23,9 @@ layout(binding = 0) uniform Data {
 
 uniform mat4 model;
 
-uniform mat4 u_joint_matrices[12];
+uniform mat4 u_joint_matrix[12];
 
 void main() {
-    const vec4 position = model * vec4(in_pos, 1.0);
-
     out_normal = normalize(mat3(model) * in_normal);
     out_tangent = normalize(mat3(model) * in_tangent_bitangent_sign.xyz);
     out_bitangent = cross(out_tangent, out_normal) * (in_tangent_bitangent_sign.w > 0.0 ? 1.0 : -1.0);
@@ -36,13 +34,14 @@ void main() {
     out_color = in_color;
     
     mat4 skin_matrix = 
-        in_weight.x * u_joint_matrices[int(in_joint.x)] +
-        in_weight.y * u_joint_matrices[int(in_joint.y)] +
-        in_weight.z * u_joint_matrices[int(in_joint.z)] +
-        in_weight.w * u_joint_matrices[int(in_joint.w)];
+        in_weight.x * u_joint_matrix[int(in_joint.x)] +
+        in_weight.y * u_joint_matrix[int(in_joint.y)] +
+        in_weight.z * u_joint_matrix[int(in_joint.z)] +
+        in_weight.w * u_joint_matrix[int(in_joint.w)];
 
-    out_position = (skin_matrix * position).xyz;
+    const vec4 position = skin_matrix * vec4(in_pos, 1.0);
+    out_position = position.xyz;
 
-    gl_Position = frame.camera.view_proj * skin_matrix * position;
+    gl_Position = frame.camera.view_proj * position;
 }
 
