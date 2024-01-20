@@ -23,7 +23,8 @@ layout(binding = 0) uniform Data {
 
 uniform mat4 model;
 
-uniform mat4 u_joint_matrix[12];
+const int MAX_BONES = 53;
+uniform mat4 u_joint_matrix[MAX_BONES];
 
 void main() {
     out_normal = normalize(mat3(model) * in_normal);
@@ -32,6 +33,23 @@ void main() {
 
     out_uv = in_uv;
     out_color = in_color;
+
+    /* vec4 totalPosition = vec4(0.0f);
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        if(in_joint[i] == -1) 
+            continue;
+        if(in_joint[i] >= MAX_BONES) 
+        {
+            totalPosition = vec4(in_pos,1.0f);
+            continue;
+        }
+        vec4 localPosition = u_joint_matrix[int(in_joint[i])] * vec4(in_pos,1.0f);
+        totalPosition += localPosition * in_weight[i];
+        vec3 localNormal = mat3(u_joint_matrix[int(in_joint[i])]) * in_normal;
+    }
+		
+    gl_Position =  frame.camera.view_proj * model * totalPosition; */
     
     mat4 skin_matrix = 
         in_weight.x * u_joint_matrix[int(in_joint.x)] +

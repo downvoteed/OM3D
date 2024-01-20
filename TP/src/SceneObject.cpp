@@ -24,8 +24,9 @@ void SceneObject::render() const {
 
     _material->set_uniform(HASH("model"), transform());
 
-    glm::mat4 jointmatrix[12];
-    for (int i = 0; i < 12; i++)
+    int size = _mesh->get_skeleton().joints().size() < 100 ? _mesh->get_skeleton().joints().size() : 100;
+    glm::mat4 jointmatrix[100];
+    for (int i = 0; i < size; i++)
     {
         jointmatrix[i] = _mesh->get_skeleton().joints()[i];
     }

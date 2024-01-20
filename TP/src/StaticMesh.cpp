@@ -56,7 +56,7 @@ void StaticMesh::draw() const {
     // Vertex color
     glVertexAttribPointer(4, 3, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(12 * sizeof(float)));
     // Vertex joints (UINT)
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, false, sizeof(Vertex), reinterpret_cast<void*>(15 * sizeof(uint8_t)));
+    glVertexAttribIPointer(5, 4, GL_UNSIGNED_BYTE, sizeof(Vertex), reinterpret_cast<void*>(15 * sizeof(uint8_t)));
     // Vertex weights
     glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void*>(19 * sizeof(float)));
 

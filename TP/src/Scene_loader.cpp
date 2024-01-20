@@ -537,7 +537,7 @@ Result<std::unique_ptr<Scene>> Scene::from_gltf(const std::string& file_name) {
             
             if (gltf.skins.size() > 0) 
             {
-                const tinygltf::Skin &skin = gltf.skins[0];
+                const tinygltf::Skin &skin = gltf.skins[node.skin];
 
                 if (skin.joints.size() > 0) 
                 {
