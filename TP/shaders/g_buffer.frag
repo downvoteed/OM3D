@@ -6,6 +6,8 @@
 
 // #define DEBUG_NORMAL
 
+//#define NORMAL_MAPPED
+
 layout(location = 0) out vec4 out_albedo_roughness;
 layout(location = 1) out vec4 out_normal_metallic;
 

@@ -51,13 +51,13 @@ void main() {
 		
     gl_Position =  frame.camera.view_proj * model * totalPosition; */
     
-    mat4 skin_matrix = 
+    mat4 skin_matrix =
         in_weight.x * u_joint_matrix[int(in_joint.x)] +
         in_weight.y * u_joint_matrix[int(in_joint.y)] +
         in_weight.z * u_joint_matrix[int(in_joint.z)] +
         in_weight.w * u_joint_matrix[int(in_joint.w)];
 
-    const vec4 position = skin_matrix * vec4(in_pos, 1.0);
+   const vec4 position = skin_matrix * vec4(in_pos, 1.0);
     out_position = position.xyz;
 
     gl_Position = frame.camera.view_proj * position;
