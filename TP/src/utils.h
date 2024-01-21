@@ -9,7 +9,7 @@
 #include <array>
 
 #define FWD(var) std::forward<decltype(var)>(var)
-#define HASH(str) ([] { static constexpr u32 result = ::OM3D::str_hash(str); return result; }())
+#define HASH(str) ([=] { static u32 result = ::OM3D::str_hash(str); return result; }())
 
 // Execute expr at scope exit
 #define DEFER(expr) auto CREATE_UNIQUE_NAME_WITH_PREFIX(defer) = ::OM3D::ScopeGuard([&]() { expr; })

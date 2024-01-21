@@ -12,6 +12,43 @@ namespace OM3D {
 bool audit_bindings_before_draw = false;
 
 
+    void GLAPIENTRY OpenGLCallback([[maybe_unused]] GLenum source,
+                               const GLenum type, [[maybe_unused]] GLuint id,
+                               const GLenum severity,
+                               [[maybe_unused]] GLsizei length,
+                               const GLchar* message,
+                               [[maybe_unused]] const void* userParam)
+    {
+        std::string error_message = "[OpenGL Callback] ";
+
+        switch (type)
+        {
+            case GL_DEBUG_TYPE_ERROR:
+                error_message += "(ERROR) ";
+            break;
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+                error_message += "(DEPRECATED_BEHAVIOR) ";
+            break;
+            default:;
+
+        }
+
+        switch (severity)
+        {
+            case GL_DEBUG_SEVERITY_HIGH:
+                error_message += "(HIGH) ";
+            break;
+            case GL_DEBUG_SEVERITY_MEDIUM:
+                error_message += "(MEDIUM) ";
+            break;
+            default:
+                    return;
+        }
+
+        error_message += message;
+
+        std::cout << error_message << std::endl;
+    }
 
 
 void debug_out(GLenum, GLenum type, GLuint, GLenum sev, GLsizei, const char* msg, const void*) {
@@ -78,7 +115,7 @@ void init_graphics() {
     glClearColor(0.5f, 0.7f, 0.8f, 0.0f);
 
     {
-        glDebugMessageCallback(&debug_out, nullptr);
+        glDebugMessageCallback(&OpenGLCallback, nullptr);
 
         glEnable(GL_DEBUG_OUTPUT);
 #ifdef OS_WIN

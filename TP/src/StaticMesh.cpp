@@ -52,7 +52,7 @@ namespace OM3D {
         // // Vertex joints (UINT)
         glVertexAttribIPointer(5, 4, GL_UNSIGNED_BYTE, sizeof(Vertex), reinterpret_cast<void *>(15 * sizeof(float)));
         // // Vertex weights
-        glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void *>(15 * sizeof(float) + 4 * sizeof(uint8_t)));
+        glVertexAttribPointer(6, 4, GL_FLOAT, false, sizeof(Vertex), reinterpret_cast<void *>(15 * sizeof(float) + 4 * sizeof(unsigned char)));
 
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);

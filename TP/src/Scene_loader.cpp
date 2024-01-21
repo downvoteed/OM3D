@@ -572,7 +572,7 @@ namespace OM3D {
                             const glm::mat4 global_node_tranform = node_transforms[skin.joints[i]];
                             glm::mat4 inverse_joint_node_tranform = glm::inverse(global_node_tranform);
                             glm::mat4 joint_transform = global_node_tranform * inverse_bind_matrices;
-                            joint_matrices.push_back(inverse_joint_node_tranform * joint_transform);
+                            joint_matrices.push_back(inverse_joint_node_tranform * joint_transform * inverse_bind_matrices);
                             // * inverse_bind_matrices ?
                         }
 
