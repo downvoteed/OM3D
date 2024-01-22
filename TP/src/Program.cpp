@@ -273,7 +273,7 @@ namespace OM3D {
     }
 
     void Program::set_uniform(u32 name_hash, glm::mat4* value, int count) {
-        const auto loc = find_location(name_hash);
+        const auto loc =  glGetUniformLocation(this->_handle.get(), "u_joint_matrix");
         if(loc >= 0) {
             glProgramUniformMatrix4fv(_handle.get(), loc, count, false, glm::value_ptr(*value));
         }

@@ -576,7 +576,8 @@ namespace OM3D {
                             // * inverse_bind_matrices ?
                         }
 
-                        static_mesh->set_skeleton(Skeleton(inverse_bind_matrices, joint_matrices));
+                        auto skeleton = std::make_shared<Skeleton>(inverse_bind_matrices, joint_matrices);
+                        static_mesh->set_skeleton(skeleton);
                     }
                 }
 

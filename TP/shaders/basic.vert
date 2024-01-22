@@ -22,10 +22,12 @@ layout(binding = 0) uniform Data {
 };
 
 uniform mat4 model;
+uniform bool u_has_skeleton;
 
-uniform mat4 u_joint_matrix[53];
+uniform mat4 u_joint_matrix[256];
 
-void main() {
+void main()
+{
     out_normal = normalize(mat3(model) * in_normal);
     out_tangent = normalize(mat3(model) * in_tangent_bitangent_sign.xyz);
     out_bitangent = cross(out_tangent, out_normal) * (in_tangent_bitangent_sign.w > 0.0 ? 1.0 : -1.0);
@@ -33,16 +35,24 @@ void main() {
     out_uv = in_uv;
     out_color = in_color;
 
+    vec4 position = vec4(vec3(0), 1);
 
-    mat4 skin_matrix =
+    if (u_has_skeleton)
+    {
+        mat4 skin_matrix =
         in_weight.x * u_joint_matrix[int(in_joint.x)] +
         in_weight.y * u_joint_matrix[int(in_joint.y)] +
         in_weight.z * u_joint_matrix[int(in_joint.z)] +
         in_weight.w * u_joint_matrix[int(in_joint.w)];
 
-   const vec4 position = skin_matrix * vec4(in_pos, 1.0);
-    out_position = position.xyz;
+        position = skin_matrix * vec4(in_pos, 1.0);
+    }
+    else
+    {
+        position = vec4(in_pos, 1.0);
+    }
 
+    out_position = position.xyz;
     gl_Position = frame.camera.view_proj * model * position;
 }
 

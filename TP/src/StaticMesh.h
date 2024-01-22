@@ -5,6 +5,7 @@
 #include <TypedBuffer.h>
 #include <Vertex.h>
 #include <math.h>
+#include <memory>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -14,7 +15,6 @@ namespace OM3D {
 
 class Skeleton {
     public:
-        Skeleton() = default;
         Skeleton(glm::mat4 inverseBindMatrix, std::vector<glm::mat4> joints):
             _inverseBindMatrix(inverseBindMatrix),
             _joints(joints)
@@ -101,15 +101,15 @@ class StaticMesh : NonCopyable {
 
         void draw() const;
 
-        const Skeleton& get_skeleton() const;
-        void set_skeleton(const Skeleton& skel);
+        [[nodiscard]] const std::shared_ptr<Skeleton>& get_skeleton() const;
+        void set_skeleton(const std::shared_ptr<Skeleton>& skel);
 
         private:
             TypedBuffer<Vertex> _vertex_buffer;
             TypedBuffer<u32> _index_buffer;
             Sphere _bounding_sphere;
 
-            Skeleton _skeleton;
+            std::shared_ptr<Skeleton> _skeleton;
         };
 }
 

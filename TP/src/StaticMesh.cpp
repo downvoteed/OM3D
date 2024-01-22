@@ -70,11 +70,11 @@ namespace OM3D {
         glDrawElements(GL_TRIANGLES, int(_index_buffer.element_count()), GL_UNSIGNED_INT, nullptr);
     }
 
-    void StaticMesh::set_skeleton(const Skeleton& skel) {
+    void StaticMesh::set_skeleton(const std::shared_ptr<Skeleton>& skel) {
         _skeleton = skel;
     }
 
-    const Skeleton& StaticMesh::get_skeleton() const {
+    const std::shared_ptr<Skeleton>& StaticMesh::get_skeleton() const {
         return _skeleton;
     }
 }

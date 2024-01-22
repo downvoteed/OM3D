@@ -23,12 +23,17 @@ namespace OM3D {
 
         _material->set_uniform(HASH("model"), transform());
 
-        int size = _mesh->get_skeleton().joints().size() < 100 ? _mesh->get_skeleton().joints().size() : 100;
-        glm::mat4 jointmatrix[53];
-        for (int i = 0; i < 53; i++) {
-            jointmatrix[i] = _mesh->get_skeleton().joints()[i];
-            const std::string name = "u_joint_matrix[" + std::to_string(i) + "]";
-            _material->set_uniform(HASH(name), &jointmatrix[i], 1);
+        if (const auto skeleton = _mesh->get_skeleton(); !skeleton) {
+            _material->set_uniform(HASH("u_has_skeleton"), false);
+        } else {
+            auto size = skeleton->joints().size();
+            glm::mat4 jointmatrix[size];
+            for (int i = 0; i < size; i++) {
+                jointmatrix[i] = _mesh->get_skeleton()->joints()[i];
+            }
+
+            _material->set_uniform(HASH("u_joint_matrix"), &jointmatrix[0], size);
+            _material->set_uniform(HASH("u_has_skeleton"), true);
         }
 
 
