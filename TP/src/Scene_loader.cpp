@@ -758,6 +758,7 @@ namespace OM3D
                 // each joint is an index which is the index of the node
                 // in the gltf.nodes array
                 std::map<int, glm::mat4> joint_matrices;
+                std::map<int, Node> joint_nodes;
                 for (int i = 0; i < skin.joints.size(); i++)
                 {
                     const glm::mat4 global_node_tranform =
@@ -771,10 +772,37 @@ namespace OM3D
                           inverse_joint_node_tranform * joint_transform
                               * inverse_bind_matrices });
                     // * inverse_bind_matrices ?
+
+                    Node joint_node = Node();
+                    joint_node.index = skin.joints[i];
+                    if (gltf.nodes[skin.joints[i]].translation.size() > 0)
+                    {
+                        joint_node.translation = glm::vec3(
+                            gltf.nodes[skin.joints[i]].translation[0],
+                            gltf.nodes[skin.joints[i]].translation[1],
+                            gltf.nodes[skin.joints[i]].translation[2]);
+                    }
+                    if (gltf.nodes[skin.joints[i]].rotation.size() > 0)
+                    {
+                        joint_node.rotation = glm::vec4(
+                            gltf.nodes[skin.joints[i]].rotation[0],
+                            gltf.nodes[skin.joints[i]].rotation[1],
+                            gltf.nodes[skin.joints[i]].rotation[2],
+                            gltf.nodes[skin.joints[i]].rotation[3]);
+                    }
+                    if (gltf.nodes[skin.joints[i]].scale.size() > 0)
+                    {
+                        joint_node.scale = glm::vec3(
+                            gltf.nodes[skin.joints[i]].scale[0],
+                            gltf.nodes[skin.joints[i]].scale[1],
+                            gltf.nodes[skin.joints[i]].scale[2]);
+                    }
+                    joint_nodes.insert({ skin.joints[i], joint_node });
                 }
 
                 const auto skeleton = std::make_shared<Skeleton>(
                     inverse_bind_matrices, joint_matrices);
+                skeleton->set_nodes(joint_nodes);
                 static_mesh->set_skeleton(skeleton);
             }
         }
@@ -827,10 +855,11 @@ namespace OM3D
 
                 std::vector<float> input_v;
 
+                DEBUG_ASSERT(input_accessor.componentType == TINYGLTF_PARAMETER_TYPE_FLOAT);
                 for (int x = 0; x < input_accessor.count; x++)
                 {
                     float temp;
-                    memcpy(&temp, input_ptr + x * sizeof(float), sizeof(float));
+                    memcpy(&temp, input_ptr + x, sizeof(float));
 
                     input_v.push_back(temp);
                 }
@@ -843,17 +872,23 @@ namespace OM3D
                     output_buffer.data.data() + output_accessor.byteOffset
                     + output_bufferView.byteOffset);
 
+                DEBUG_ASSERT(output_accessor.componentType == TINYGLTF_PARAMETER_TYPE_FLOAT);
                 for (int x = 0; x < output_accessor.count; x++)
                 {
-                    glm::vec4 temp;
-                    memcpy(glm::value_ptr(temp),
-                        output_ptr + x * sizeof(glm::vec4),
-                        sizeof(glm::vec4));
-
-                    output_v.push_back(temp);
+                    if(output_accessor.type == TINYGLTF_TYPE_VEC4)  {
+                        glm::vec4 temp;
+                        memcpy(&temp, output_ptr + (x * 4), sizeof(glm::vec4));
+                        output_v.push_back(temp);
+                    } else if(output_accessor.type == TINYGLTF_TYPE_VEC3) {
+                        glm::vec3 temp;
+                        memcpy(&temp, output_ptr + (x * 3), sizeof(glm::vec3));
+                        output_v.push_back(glm::vec4(temp, 0.0f));
+                    } else {
+                        DEBUG_ASSERT(false);
+                    }
                 }
 
-                Node target = Node();
+                /* Node target = Node();
                 target.index = channel.target_node;
                 if (gltf.nodes[channel.target_node].translation.size() > 0)
                 {
@@ -876,7 +911,7 @@ namespace OM3D
                         gltf.nodes[channel.target_node].scale[0],
                         gltf.nodes[channel.target_node].scale[1],
                         gltf.nodes[channel.target_node].scale[2]);
-                }
+                } */
 
                 PathType path_type;
                 if (channel.target_path == "translation")
@@ -896,7 +931,7 @@ namespace OM3D
 
                 AnimationSampler animSampler = AnimationSampler(input_v, output_v, interpolation_type);
 
-                AnimationChannel animChannel = AnimationChannel(animSampler, target, path_type);
+                AnimationChannel animChannel = AnimationChannel(animSampler, channel.target_node, path_type);
 
                 animChannels.push_back(animChannel);
             }

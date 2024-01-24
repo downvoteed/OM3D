@@ -31,9 +31,14 @@ namespace OM3D
         void set_joints(const std::map<int, glm::mat4>& joints);
         std::map<int, glm::mat4>& joints();
 
+        void add_node(int index, Node& node);
+        void set_nodes(const std::map<int, Node>& nodes);
+        std::map<int, Node>& nodes();
+
     private:
         glm::mat4 _inverseBindMatrix = glm::mat4(1.0f);
         std::map<int, glm::mat4> _joints;
+        std::map<int, Node> _nodes;
     };
 
     struct MeshData

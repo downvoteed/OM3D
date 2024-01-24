@@ -18,6 +18,11 @@ namespace OM3D
         return this->_mesh->get_bounding_sphere();
     }
 
+    Skeleton* SceneObject::get_skeleton() const
+    {
+        return this->_mesh->get_skeleton().get();
+    }
+
     void SceneObject::render() const
     {
         if (!_material || !_mesh)
@@ -39,17 +44,8 @@ namespace OM3D
             for (auto [nodeIndex, matrix] : skeleton->joints())
             {
                 jointmatrix[i++] = matrix;
-                /* std::cout << "matrix:";
-                for (int j = 0; j < 4; j++)
-                {
-                    for (int k = 0; k < 4; k++)
-                    {
-                        std::cout << matrix[j][k] << " ";
-                    }
-                    std:: cout << std::endl;
-                }
-                std::cout << std::endl; */
             }
+            std::cout << "matrix:" << jointmatrix[0][0][0] << std::endl;
 
             _material->set_uniform(HASH("u_joint_matrix"), &jointmatrix[0],
                                    size);
@@ -70,7 +66,7 @@ namespace OM3D
         return _transform;
     }
 
-    void SceneObject::updateJointMatrix(Node node)
+    void SceneObject::updateJointMatrix()
     {
         if (const auto skeleton = _mesh->get_skeleton(); !skeleton)
         {
@@ -78,17 +74,25 @@ namespace OM3D
         }
         else
         {
-            int nodeIndex = node.index;
-            //check if the node is in the skeleton
+            for (auto &[index, node] : skeleton->nodes())
+            {
+                const glm::tquat<float> q(node.rotation.w, node.rotation.x, node.rotation.y, node.rotation.z);
+                glm::mat4 nodeTransform = glm::translate(glm::mat4(1.0f), node.translation) * glm::mat4_cast(q) * glm::scale(glm::mat4(1.0f), node.scale);
+                glm::mat4 inverseNodeTransform = glm::inverse(nodeTransform);
+                glm::mat4 jointTransform = skeleton->inverse_bind_matrix() * nodeTransform;
+                skeleton->joints().at(index) = inverseNodeTransform * jointTransform;
+            }
+            /* //check if the node is in the skeleton
             if (skeleton->joints().find(nodeIndex) != skeleton->joints().end())
             {
+                Node& node = skeleton->nodes().at(nodeIndex);
                 // compute node transformation matrix             
                 const glm::tquat<float> q(node.rotation.w, node.rotation.x, node.rotation.y, node.rotation.z);
                 glm::mat4 nodeTransform = glm::translate(glm::mat4(1.0f), node.translation) * glm::mat4_cast(q) * glm::scale(glm::mat4(1.0f), node.scale);
                 glm::mat4 inverseNodeTransform = glm::inverse(nodeTransform);
                 glm::mat4 jointTransform = skeleton->inverse_bind_matrix() * nodeTransform;
                 skeleton->joints().at(nodeIndex) = inverseNodeTransform * jointTransform;
-            }
+            } */
         }
     }
 

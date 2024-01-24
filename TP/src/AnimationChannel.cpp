@@ -2,10 +2,10 @@
 
 namespace OM3D
 {
-    AnimationChannel::AnimationChannel(AnimationSampler sampler, Node node,
+    AnimationChannel::AnimationChannel(AnimationSampler sampler, int nodeIndex,
                                        PathType pathType)
         : _sampler(sampler)
-        , _node(node)
+        , _nodeIndex(nodeIndex)
         , _pathType(pathType)
     {}
 
@@ -19,14 +19,14 @@ namespace OM3D
         this->_sampler = sampler;
     }
 
-    Node AnimationChannel::node() const
+    int AnimationChannel::nodeIndex() const
     {
-        return this->_node;
+        return this->_nodeIndex;
     }
 
-    void AnimationChannel::set_node(Node node)
+    void AnimationChannel::set_nodeIndex(int nodeIndex)
     {
-        this->_node = node;
+        this->_nodeIndex = nodeIndex;
     }
 
     PathType AnimationChannel::path_type() const
@@ -39,19 +39,19 @@ namespace OM3D
         this->_pathType = pathType;
     }
 
-    void AnimationChannel::update()
+    void AnimationChannel::update(Node& node)
     {
         glm::vec4 output = _sampler.update();
         switch (_pathType)
         {
         case TRANSLATION:
-            _node.translation = glm::vec3(output.x, output.y, output.z);
+            node.translation = glm::vec3(output.x, output.y, output.z);
             break;
         case ROTATION:
-            _node.rotation = glm::vec4(output.x, output.y, output.z, output.w);
+            node.rotation = glm::vec4(output.x, output.y, output.z, output.w);
             break;
         case SCALE:
-            _node.scale = glm::vec3(output.x, output.y, output.z);
+            node.scale = glm::vec3(output.x, output.y, output.z);
             break;
         default:
             break;

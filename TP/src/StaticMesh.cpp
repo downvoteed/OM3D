@@ -31,6 +31,21 @@ namespace OM3D
         return this->_joints;
     }
 
+    void Skeleton::add_node(int index, Node& node)
+    {
+        this->_nodes.insert({ index, node });
+    }
+
+    void Skeleton::set_nodes(const std::map<int, Node>& nodes)
+    {
+        this->_nodes = nodes;
+    }
+
+    std::map<int, Node>& Skeleton::nodes()
+    {
+        return this->_nodes;
+    }
+
     StaticMesh::StaticMesh(const MeshData& data)
         : _vertex_buffer(data.vertices)
         , _index_buffer(data.indices)
@@ -96,4 +111,5 @@ namespace OM3D
     {
         return _skeleton;
     }
+
 } // namespace OM3D

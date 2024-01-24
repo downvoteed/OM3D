@@ -17,21 +17,21 @@ namespace OM3D
         //AnimationChannel() = delete;
         //AnimationChannel(const AnimationChannel&) = delete;
         //AnimationChannel& operator=(const AnimationChannel&) = delete;
-        AnimationChannel(AnimationSampler sampler, Node node, PathType pathType);
+        AnimationChannel(AnimationSampler sampler, int nodeIndex, PathType pathType);
 
-        void update();
+        void update(Node& node);
 
         AnimationSampler sampler() const;
         void set_sampler(AnimationSampler sampler);
 
-        Node node() const;
-        void set_node(Node node);
+        int nodeIndex() const;
+        void set_nodeIndex(int nodeIndex);
 
         PathType path_type() const;
         void set_path_type(PathType pathType);
     private:
         AnimationSampler _sampler;
-        Node _node;
+        int _nodeIndex;
         PathType _pathType;
 
     };
