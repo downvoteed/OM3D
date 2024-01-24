@@ -14,10 +14,12 @@ namespace OM3D
     class AnimationChannel
     {
     public:
-        AnimationChannel() = delete;
-        AnimationChannel(const AnimationChannel&) = delete;
-        AnimationChannel& operator=(const AnimationChannel&) = delete;
+        //AnimationChannel() = delete;
+        //AnimationChannel(const AnimationChannel&) = delete;
+        //AnimationChannel& operator=(const AnimationChannel&) = delete;
         AnimationChannel(AnimationSampler sampler, Node node, PathType pathType);
+
+        void update();
 
         AnimationSampler sampler() const;
         void set_sampler(AnimationSampler sampler);

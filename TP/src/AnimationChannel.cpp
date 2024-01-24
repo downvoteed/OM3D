@@ -39,4 +39,23 @@ namespace OM3D
         this->_pathType = pathType;
     }
 
+    void AnimationChannel::update()
+    {
+        glm::vec4 output = _sampler.update();
+        switch (_pathType)
+        {
+        case TRANSLATION:
+            _node.translation = glm::vec3(output.x, output.y, output.z);
+            break;
+        case ROTATION:
+            _node.rotation = glm::vec4(output.x, output.y, output.z, output.w);
+            break;
+        case SCALE:
+            _node.scale = glm::vec3(output.x, output.y, output.z);
+            break;
+        default:
+            break;
+        }
+    }
+
 } // namespace OM3D

@@ -20,21 +20,25 @@ class Scene : NonMovable {
 
         void render() const;
         void renderLights() const;
-
+        void renderAnimators() const;
+        
         void add_object(SceneObject obj);
         void add_light(PointLight obj);
 
         Span<const SceneObject> objects() const;
         Span<const PointLight> point_lights() const;
+        std::vector<AnimationChannel>& animators();
 
         Camera& camera();
         const Camera& camera() const;
 
         void set_sun(glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f));
+        void set_animators(std::vector<AnimationChannel>& animators);
 
     private:
         std::vector<SceneObject> _objects;
         std::vector<PointLight> _point_lights;
+        std::vector<AnimationChannel> _animators;
 
         glm::vec3 _sun_direction = glm::vec3(0.2f, 1.0f, 0.1f);
         glm::vec3 _sun_color = glm::vec3(1.0f);

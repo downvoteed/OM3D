@@ -26,17 +26,21 @@ namespace OM3D
         this->_joints = joints;
     }
 
-    const std::map<int, glm::mat4>& Skeleton::joints() const
+    std::map<int, glm::mat4>& Skeleton::joints()
     {
         return this->_joints;
     }
 
-    void Skeleton::set_animators(const std::vector<AnimationSampler>& animators)
+    void Skeleton::set_animators(std::vector<AnimationChannel>& animators)
     {
-        this->_animators = animators;
+        this->_animators.clear();
+        for (auto& animator : animators)
+        {
+            this->_animators.push_back(animator);
+        }
     }
 
-    const std::vector<AnimationSampler>& Skeleton::get_animators() const
+    const std::vector<AnimationChannel>& Skeleton::get_animators() const
     {
         return this->_animators;
     }

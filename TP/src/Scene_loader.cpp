@@ -31,7 +31,7 @@ namespace OM3D
                       std::unordered_map<int, glm::mat4> node_transforms,
                       int j);
 
-    void loadAnimation(const tinygltf::Model& gltf);
+    std::vector<AnimationChannel> loadAnimation(const tinygltf::Model& gltf);
 
     bool display_gltf_loading_warnings = false;
 
@@ -554,7 +554,8 @@ namespace OM3D
                 scene_objects.insert(std::pair(node_index, scene_object));
             }
         }
-        loadAnimation(gltf);
+        std::vector<AnimationChannel> animchannels = loadAnimation(gltf);
+        scene->set_animators(animchannels);
 
         // Mesh. Load sphere.glb and add it to the scene
 
@@ -738,7 +739,8 @@ namespace OM3D
                 glm::mat4 inverse_bind_matrices;
 
                 glm::mat4 m;
-                memcpy(glm::value_ptr(m), ptr + j * 16, 16 * sizeof(float));
+                //memcpy(glm::value_ptr(m), ptr + j * 16, 16 * sizeof(float));
+                memcpy(glm::value_ptr(m), ptr, 16 * sizeof(float));
                 inverse_bind_matrices = m;
 
                 // print inverse_bind_matrices
@@ -778,25 +780,29 @@ namespace OM3D
         }
     }
 
-    void loadAnimation(const tinygltf::Model& gltf)
+    std::vector<AnimationChannel> loadAnimation(const tinygltf::Model& gltf)
     {
         if (gltf.animations.size() > 0)
         {
             const tinygltf::Animation& animation = gltf.animations[0];
+            std::cout << "anim name = " << animation.name << std::endl;
             std::cout << "num channels = " << animation.channels.size()
-                      << std::endl;
+                    << std::endl;
             std::cout << "num samplers = " << animation.samplers.size()
-                      << std::endl;
+                    << std::endl;
             std::cout << "num nodes = " << gltf.nodes.size() << std::endl;
-
-            std::vector<std::vector<glm::mat4>> node_matrices;
+                
+            /* std::vector<std::vector<glm::mat4>> node_matrices;
             for (int i = 0; i < gltf.nodes.size(); i++)
             {
                 node_matrices.push_back(std::vector<glm::mat4>());
-            }
+            } */
+
+            std::vector<AnimationChannel> animChannels;
 
             for (int i = 0; i < animation.channels.size(); i++)
             {
+
                 const tinygltf::AnimationChannel& channel =
                     animation.channels[i];
                 const tinygltf::AnimationSampler& sampler =
@@ -841,30 +847,61 @@ namespace OM3D
                 {
                     glm::vec4 temp;
                     memcpy(glm::value_ptr(temp),
-                           output_ptr + x * sizeof(glm::vec4),
-                           sizeof(glm::vec4));
+                        output_ptr + x * sizeof(glm::vec4),
+                        sizeof(glm::vec4));
 
                     output_v.push_back(temp);
                 }
 
-                auto target = channel.target_node;
-
-                std::vector<float> input;
-                std::vector<float> output;
-
-                for (int i = 0; i < input_accessor.count; i++)
+                Node target = Node();
+                target.index = channel.target_node;
+                if (gltf.nodes[channel.target_node].translation.size() > 0)
                 {
-                    input.push_back(input_ptr[i]);
+                    target.translation = glm::vec3(
+                        gltf.nodes[channel.target_node].translation[0],
+                        gltf.nodes[channel.target_node].translation[1],
+                        gltf.nodes[channel.target_node].translation[2]);
+                }
+                if (gltf.nodes[channel.target_node].rotation.size() > 0)
+                {
+                    target.rotation = glm::vec4(
+                        gltf.nodes[channel.target_node].rotation[0],
+                        gltf.nodes[channel.target_node].rotation[1],
+                        gltf.nodes[channel.target_node].rotation[2],
+                        gltf.nodes[channel.target_node].rotation[3]);
+                }
+                if (gltf.nodes[channel.target_node].scale.size() > 0)
+                {
+                    target.scale = glm::vec3(
+                        gltf.nodes[channel.target_node].scale[0],
+                        gltf.nodes[channel.target_node].scale[1],
+                        gltf.nodes[channel.target_node].scale[2]);
                 }
 
-                for (int i = 0; i < output_accessor.count; i++)
-                {
-                    output.push_back(output_ptr[i]);
-                }
+                PathType path_type;
+                if (channel.target_path == "translation")
+                    path_type = PathType::TRANSLATION;
+                else if (channel.target_path == "rotation")
+                    path_type = PathType::ROTATION;
+                else if (channel.target_path == "scale")
+                    path_type = PathType::SCALE;
 
-                std::cout << "input size = " << input.size() << std::endl;
-                std::cout << "output size = " << output.size() << std::endl;
+                InterpolationType::Type interpolation_type;
+                if (sampler.interpolation == "LINEAR")
+                    interpolation_type = InterpolationType::Type::LINEAR;
+                else if (sampler.interpolation == "STEP")
+                    interpolation_type = InterpolationType::Type::STEP;
+                else if (sampler.interpolation == "CUBICSPLINE")
+                    interpolation_type = InterpolationType::Type::CUBICSPLINE;
+
+                AnimationSampler animSampler = AnimationSampler(input_v, output_v, interpolation_type);
+
+                AnimationChannel animChannel = AnimationChannel(animSampler, target, path_type);
+
+                animChannels.push_back(animChannel);
             }
+            return animChannels;
         }
+        return {};
     }
 }

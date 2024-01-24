@@ -29,6 +29,11 @@ Span<const PointLight> Scene::point_lights() const {
     return _point_lights;
 }
 
+std::vector<AnimationChannel>& Scene::animators()
+{
+    return this->_animators;
+}
+
 Camera& Scene::camera() {
     return _camera;
 }
@@ -40,6 +45,15 @@ const Camera& Scene::camera() const {
 void Scene::set_sun(glm::vec3 direction, glm::vec3 color) {
     _sun_direction = direction;
     _sun_color = color;
+}
+
+void Scene::set_animators(std::vector<AnimationChannel>& animators)
+{
+    this->_animators.clear();
+    for (auto& animator : animators)
+    {
+        this->_animators.push_back(animator);
+    }
 }
 
 void Scene::renderLights() const
@@ -133,6 +147,24 @@ void Scene::render() const {
 
         if (is_in_frustum)
             obj.render();
+    }
+}
+
+void Scene::renderAnimators() const
+{
+    for (auto channel : this->_animators)
+    {
+        channel.update();
+    }
+
+    // update the joints matrices
+    for (auto channel : this->_animators)
+    {
+        Node node = channel.node();
+        for (auto obj : this->_objects)
+        {
+            obj.updateJointMatrix(node);
+        }
     }
 }
 

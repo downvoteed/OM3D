@@ -35,9 +35,20 @@ namespace OM3D
         {
             auto size = skeleton->joints().size();
             glm::mat4 jointmatrix[size];
-            for (int i = 0; i < size; i++)
+            int i = 0;
+            for (auto [nodeIndex, matrix] : skeleton->joints())
             {
-                jointmatrix[i] = _mesh->get_skeleton()->joints()[i];
+                jointmatrix[i++] = matrix;
+                /* std::cout << "matrix:";
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 4; k++)
+                    {
+                        std::cout << matrix[j][k] << " ";
+                    }
+                    std:: cout << std::endl;
+                }
+                std::cout << std::endl; */
             }
 
             _material->set_uniform(HASH("u_joint_matrix"), &jointmatrix[0],
@@ -58,4 +69,27 @@ namespace OM3D
     {
         return _transform;
     }
+
+    void SceneObject::updateJointMatrix(Node node)
+    {
+        if (const auto skeleton = _mesh->get_skeleton(); !skeleton)
+        {
+            return;
+        }
+        else
+        {
+            int nodeIndex = node.index;
+            //check if the node is in the skeleton
+            if (skeleton->joints().find(nodeIndex) != skeleton->joints().end())
+            {
+                // compute node transformation matrix             
+                const glm::tquat<float> q(node.rotation.w, node.rotation.x, node.rotation.y, node.rotation.z);
+                glm::mat4 nodeTransform = glm::translate(glm::mat4(1.0f), node.translation) * glm::mat4_cast(q) * glm::scale(glm::mat4(1.0f), node.scale);
+                glm::mat4 inverseNodeTransform = glm::inverse(nodeTransform);
+                glm::mat4 jointTransform = skeleton->inverse_bind_matrix() * nodeTransform;
+                skeleton->joints().at(nodeIndex) = inverseNodeTransform * jointTransform;
+            }
+        }
+    }
+
 } // namespace OM3D

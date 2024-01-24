@@ -1,24 +1,16 @@
 #include "AnimationSampler.h"
+#include <GLFW/glfw3.h>
+#include <iostream>
 
 namespace OM3D
 {
     AnimationSampler::AnimationSampler(
         std::vector<float> inputs, std::vector<glm::vec4> outputs,
         InterpolationType::Type interpolationType)
-        : this->_inputs(inputs)
-    , this->_outputs(outputs)
-    , this->_interpolationType(interpolationType)
+        : _inputs(inputs)
+    , _outputs(outputs)
+    , _interpolationType(interpolationType)
     {}
-
-    int AnimationSampler::index() const
-    {
-        return this->_index;
-    }
-
-    void AnimationSampler::setthis->_index(int index)
-    {
-        this->_index = index;
-    }
 
     std::vector<float> AnimationSampler::inputs() const
     {
@@ -49,6 +41,48 @@ namespace OM3D
         InterpolationType::Type interpolationType)
     {
         this->_interpolationType = interpolationType;
+    }
+
+    glm::vec4 AnimationSampler::update()
+    {
+        // get the current time of the program
+        float currentTime = glfwGetTime();
+        currentTime -= _time;
+        // if the time is greater than the last input, reset the time
+        if (_index >= _inputs.size() - 1)
+        {
+            _time = glfwGetTime();
+            currentTime = 0.0f + 0.0001f;
+            _index = 0;
+        }
+        float previousTime = _inputs[_index];
+        float nextTime = _inputs[_index + 1];
+
+        glm::vec4 previousOutput = _outputs[_index];
+        glm::vec4 nextOutput = _outputs[_index + 1];
+
+        _index++;
+
+        if (_interpolationType == InterpolationType::Type::LINEAR)
+        {
+            float interpolationValue = (currentTime - previousTime) / (nextTime - previousTime);
+            glm::vec4 output = previousOutput + interpolationValue * (nextOutput - previousOutput);
+            //std::cout << "output: " << output.x << " " << output.y << " " << output.z << " " << output.w << std::endl;
+            return output;
+        }
+        else if (_interpolationType == InterpolationType::Type::STEP)
+        {
+            return previousOutput;
+        }
+        else if (_interpolationType == InterpolationType::Type::CUBICSPLINE)
+        {
+            // TODO
+            return glm::vec4(0.0f);
+        }
+        else
+        {
+            return glm::vec4(0.0f);
+        }
     }
 
 } // namespace OM3D
