@@ -45,7 +45,7 @@ namespace OM3D
             {
                 jointmatrix[i++] = matrix;
             }
-            std::cout << "matrix:" << jointmatrix[0][0][0] << std::endl;
+            //std::cout << "matrix:" << jointmatrix[0][0][0] << std::endl;
 
             _material->set_uniform(HASH("u_joint_matrix"), &jointmatrix[0],
                                    size);

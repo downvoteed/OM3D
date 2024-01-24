@@ -396,8 +396,8 @@ int main(int argc, char** argv) {
             //renderer.main_framebuffer.bind();
             glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "g_buffer");
             renderer.g_buffer.bind();
-            scene->render();
             scene->renderAnimators();
+            scene->render();
             glPopDebugGroup();
         }
         glDisable(GL_CULL_FACE);

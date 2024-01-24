@@ -712,6 +712,36 @@ namespace OM3D
         return material;
     }
 
+    Node fillNode(tinygltf::Model gltf, tinygltf::Skin skin, int i)
+    {
+        Node joint_node = Node();
+        joint_node.index = skin.joints[i];
+        if (gltf.nodes[skin.joints[i]].translation.size() > 0)
+        {
+            joint_node.translation = glm::vec3(
+                    gltf.nodes[skin.joints[i]].translation[0],
+                    gltf.nodes[skin.joints[i]].translation[1],
+                    gltf.nodes[skin.joints[i]].translation[2]);
+        }
+        if (gltf.nodes[skin.joints[i]].rotation.size() > 0)
+        {
+            joint_node.rotation = glm::vec4(
+                    gltf.nodes[skin.joints[i]].rotation[0],
+                    gltf.nodes[skin.joints[i]].rotation[1],
+                    gltf.nodes[skin.joints[i]].rotation[2],
+                    gltf.nodes[skin.joints[i]].rotation[3]);
+        }
+        if (gltf.nodes[skin.joints[i]].scale.size() > 0)
+        {
+            joint_node.scale = glm::vec3(
+                    gltf.nodes[skin.joints[i]].scale[0],
+                    gltf.nodes[skin.joints[i]].scale[1],
+                    gltf.nodes[skin.joints[i]].scale[2]);
+        }
+
+        return joint_node;
+    }
+
     void loadSkeleton(const tinygltf::Model& gltf, const tinygltf::Node& node,
                       const std::shared_ptr<StaticMesh>& static_mesh,
                       std::unordered_map<int, glm::mat4> node_transforms,
@@ -773,30 +803,7 @@ namespace OM3D
                               * inverse_bind_matrices });
                     // * inverse_bind_matrices ?
 
-                    Node joint_node = Node();
-                    joint_node.index = skin.joints[i];
-                    if (gltf.nodes[skin.joints[i]].translation.size() > 0)
-                    {
-                        joint_node.translation = glm::vec3(
-                            gltf.nodes[skin.joints[i]].translation[0],
-                            gltf.nodes[skin.joints[i]].translation[1],
-                            gltf.nodes[skin.joints[i]].translation[2]);
-                    }
-                    if (gltf.nodes[skin.joints[i]].rotation.size() > 0)
-                    {
-                        joint_node.rotation = glm::vec4(
-                            gltf.nodes[skin.joints[i]].rotation[0],
-                            gltf.nodes[skin.joints[i]].rotation[1],
-                            gltf.nodes[skin.joints[i]].rotation[2],
-                            gltf.nodes[skin.joints[i]].rotation[3]);
-                    }
-                    if (gltf.nodes[skin.joints[i]].scale.size() > 0)
-                    {
-                        joint_node.scale = glm::vec3(
-                            gltf.nodes[skin.joints[i]].scale[0],
-                            gltf.nodes[skin.joints[i]].scale[1],
-                            gltf.nodes[skin.joints[i]].scale[2]);
-                    }
+                    Node joint_node = fillNode(gltf, skin, i);
                     joint_nodes.insert({ skin.joints[i], joint_node });
                 }
 
@@ -913,21 +920,25 @@ namespace OM3D
                         gltf.nodes[channel.target_node].scale[2]);
                 } */
 
-                PathType path_type;
+                PathType path_type = PathType::TRANSLATION;
                 if (channel.target_path == "translation")
                     path_type = PathType::TRANSLATION;
                 else if (channel.target_path == "rotation")
                     path_type = PathType::ROTATION;
                 else if (channel.target_path == "scale")
                     path_type = PathType::SCALE;
+                else
+                    std::cerr << "Animation channel without path type" << std::endl;
 
-                InterpolationType::Type interpolation_type;
+                InterpolationType::Type interpolation_type = InterpolationType::Type::LINEAR;
                 if (sampler.interpolation == "LINEAR")
                     interpolation_type = InterpolationType::Type::LINEAR;
                 else if (sampler.interpolation == "STEP")
                     interpolation_type = InterpolationType::Type::STEP;
                 else if (sampler.interpolation == "CUBICSPLINE")
                     interpolation_type = InterpolationType::Type::CUBICSPLINE;
+                else
+                    std::cerr << "Animation sampler without interpolation type" << std::endl;
 
                 AnimationSampler animSampler = AnimationSampler(input_v, output_v, interpolation_type);
 

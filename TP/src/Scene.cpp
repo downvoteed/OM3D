@@ -152,11 +152,11 @@ void Scene::render() const {
 
 void Scene::renderAnimators() const
 {
-    Node& root = this->_objects[0].get_skeleton()->nodes().at(0);
-    std::cout << "begin" << std::endl;
-    std::cout << "translation: " << root.translation.x << " " << root.translation.y << " " << root.translation.z << std::endl;
-    std::cout << "rotation: " << root.rotation.x << " " << root.rotation.y << " " << root.rotation.z << " " << root.rotation.w << std::endl;
-    std::cout << "scale: " << root.scale.x << " " << root.scale.y << " " << root.scale.z << std::endl << std::endl;
+    //Node& root = this->_objects[0].get_skeleton()->nodes()[38];
+    //std::cout << "begin" << std::endl;
+    //std::cout << "translation: " << root.translation.x << " " << root.translation.y << " " << root.translation.z << std::endl;
+    //std::cout << "rotation: " << root.rotation.x << " " << root.rotation.y << " " << root.rotation.z << " " << root.rotation.w << std::endl;
+    //std::cout << "scale: " << root.scale.x << " " << root.scale.y << " " << root.scale.z << std::endl << std::endl;
     for (auto obj : this->_objects)
     {
         for (auto channel : this->_animators)
@@ -168,14 +168,13 @@ void Scene::renderAnimators() const
                 channel.update(node);
             }
         }
-
         obj.updateJointMatrix();
     }
-    std::cout << std::endl;
+    /*std::cout << std::endl;
         std::cout << "after" << std::endl;
         std::cout << "translation: " << root.translation.x << " " << root.translation.y << " " << root.translation.z << std::endl;
         std::cout << "rotation: " << root.rotation.x << " " << root.rotation.y << " " << root.rotation.z << " " << root.rotation.w << std::endl;
-        std::cout << "scale: " << root.scale.x << " " << root.scale.y << " " << root.scale.z << std::endl << std::endl;
+        std::cout << "scale: " << root.scale.x << " " << root.scale.y << " " << root.scale.z << std::endl << std::endl;*/
 
     /* for (auto channel : this->_animators)
     {

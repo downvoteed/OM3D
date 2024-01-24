@@ -46,13 +46,13 @@ namespace OM3D
     glm::vec4 AnimationSampler::update()
     {
         // get the current time of the program
-        float currentTime = glfwGetTime();
+        double currentTime = glfwGetTime();
         currentTime -= _time;
         // if the time is greater than the last input, reset the time
         if (_index >= _inputs.size() - 1)
         {
             _time = glfwGetTime();
-            currentTime = 0.0f + 0.0001f;
+            currentTime = 0.0001f;
             _index = 0;
         }
         float previousTime = _inputs[_index];
