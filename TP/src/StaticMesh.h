@@ -29,14 +29,11 @@ namespace OM3D
 
         void add_joint(int index, glm::mat4& joint);
         void set_joints(const std::map<int, glm::mat4>& joints);
-        void set_animators(std::vector<AnimationChannel>& animators);
-        const std::vector<AnimationChannel>& get_animators() const;
         std::map<int, glm::mat4>& joints();
 
     private:
         glm::mat4 _inverseBindMatrix = glm::mat4(1.0f);
         std::map<int, glm::mat4> _joints;
-        std::vector<AnimationChannel> _animators = std::vector<AnimationChannel>();
     };
 
     struct MeshData

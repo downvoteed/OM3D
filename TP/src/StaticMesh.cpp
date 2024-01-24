@@ -31,20 +31,6 @@ namespace OM3D
         return this->_joints;
     }
 
-    void Skeleton::set_animators(std::vector<AnimationChannel>& animators)
-    {
-        this->_animators.clear();
-        for (auto& animator : animators)
-        {
-            this->_animators.push_back(animator);
-        }
-    }
-
-    const std::vector<AnimationChannel>& Skeleton::get_animators() const
-    {
-        return this->_animators;
-    }
-
     StaticMesh::StaticMesh(const MeshData& data)
         : _vertex_buffer(data.vertices)
         , _index_buffer(data.indices)
