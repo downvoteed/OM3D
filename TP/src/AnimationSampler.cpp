@@ -48,7 +48,7 @@ namespace OM3D
         // get the current time of the program
         double currentTime = glfwGetTime();
         currentTime -= _time;
-        // if the time is greater than the last input, reset the time
+        // if the index is at the end of the vector, reset the time and index
         if (_index >= _inputs.size() - 1)
         {
             _time = glfwGetTime();
