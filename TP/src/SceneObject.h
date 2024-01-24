@@ -23,7 +23,7 @@ class SceneObject {
         void set_transform(const glm::mat4& tr);
         const glm::mat4& transform() const;
 
-        void updateJointMatrix(Node node);
+        void updateJointMatrix(const Node& node);
 
     private:
         glm::mat4 _transform = glm::mat4(1.0f);

@@ -167,5 +167,9 @@ void Scene::renderAnimators() const
         }
     }
 }
+void Scene::renderMotionBlur() const
+{
 
 }
+
+} // namespace OM3D

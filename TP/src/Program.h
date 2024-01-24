@@ -13,17 +13,22 @@
 #include <memory>
 #include <vector>
 
-namespace OM3D {
-    class Program : NonCopyable {
-        struct UniformLocationInfo {
+namespace OM3D
+{
+    class Program : NonCopyable
+    {
+        struct UniformLocationInfo
+        {
             u32 name_hash;
             int location;
 
-            bool operator<(const UniformLocationInfo& other) const {
+            bool operator<(const UniformLocationInfo& other) const
+            {
                 return name_hash < other.name_hash;
             }
 
-            bool operator==(const UniformLocationInfo& other) const {
+            bool operator==(const UniformLocationInfo& other) const
+            {
                 return name_hash == other.name_hash;
             }
         };
@@ -45,10 +50,13 @@ namespace OM3D {
 
         bool is_compute() const;
 
-        static std::shared_ptr<Program> from_file(const std::string& comp, Span<const std::string> defines = {});
+        static std::shared_ptr<Program>
+        from_file(const std::string& comp,
+                  Span<const std::string> defines = {});
 
-        static std::shared_ptr<Program> from_files(const std::string& frag, const std::string& vert,
-                                                   Span<const std::string> defines = {});
+        static std::shared_ptr<Program>
+        from_files(const std::string& frag, const std::string& vert,
+                   Span<const std::string> defines = {});
 
         void set_uniform(u32 name_hash, u32 value);
 
@@ -68,23 +76,22 @@ namespace OM3D {
 
         void set_uniform(u32 name_hash, const glm::mat4& value);
 
-        void set_uniform(u32 name_hash, glm::mat4*, int count);
+        void set_uniform(const std::string& name, glm::mat4* value, int count);
 
-        template
-        <typename T>
+        template <typename T>
 
-        void set_uniform(std::string_view name, const T& value) {
+        void set_uniform(std::string_view name, const T& value)
+        {
             set_uniform(str_hash(name), value);
         }
 
-        template
-        <typename T>
-        void set_uniform(std::string_view name, const T* value, int count) {
+        template <typename T>
+        void set_uniform(std::string_view name, const T* value, int count)
+        {
             set_uniform(str_hash(name), value, count);
         }
 
-    private
-    :
+    private:
         void fetch_uniform_locations();
 
         int find_location(u32 hash);
@@ -94,6 +101,6 @@ namespace OM3D {
 
         bool _is_compute = false;
     };
-}
+} // namespace OM3D
 
 #endif // PROGRAM_H

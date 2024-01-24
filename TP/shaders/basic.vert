@@ -16,6 +16,8 @@ layout(location = 2) out vec3 out_color;
 layout(location = 3) out vec3 out_position;
 layout(location = 4) out vec3 out_tangent;
 layout(location = 5) out vec3 out_bitangent;
+layout(location = 6) out vec4 out_clip_space_position;
+layout(location = 7) out vec4 out_clip_space_prev_position;
 
 layout(binding = 0) uniform Data {
     FrameData frame;
@@ -24,7 +26,10 @@ layout(binding = 0) uniform Data {
 uniform mat4 model;
 uniform bool u_has_skeleton;
 
-uniform mat4 u_joint_matrix[256];
+const int MAX_JOINTS = 256;
+
+uniform mat4 u_joint_matrix[MAX_JOINTS];
+uniform mat4 u_joint_matrix_prev[MAX_JOINTS];
 
 void main()
 {
@@ -46,6 +51,15 @@ void main()
         in_weight.w * u_joint_matrix[int(in_joint.w)];
 
         position = skin_matrix * vec4(in_pos, 1.0);
+        out_clip_space_position = frame.camera.view_proj * model * position;
+
+        mat4 prev_skin_matrix =
+        in_weight.x * u_joint_matrix_prev[int(in_joint.x)] +
+        in_weight.y * u_joint_matrix_prev[int(in_joint.y)] +
+        in_weight.z * u_joint_matrix_prev[int(in_joint.z)] +
+        in_weight.w * u_joint_matrix_prev[int(in_joint.w)];
+
+        out_clip_space_prev_position = frame.camera.view_proj * model * prev_skin_matrix * vec4(in_pos, 1.0);
     }
     else
     {

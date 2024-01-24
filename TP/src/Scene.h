@@ -21,6 +21,7 @@ class Scene : NonMovable {
         void render() const;
         void renderLights() const;
         void renderAnimators() const;
+        void renderMotionBlur() const;
         
         void add_object(SceneObject obj);
         void add_light(PointLight obj);

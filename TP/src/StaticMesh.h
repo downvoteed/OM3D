@@ -23,17 +23,21 @@ namespace OM3D
                  const std::map<int, glm::mat4>& joints)
             : _inverseBindMatrix(inverseBindMatrix)
             , _joints(joints)
-        {}
+        {
+            this->_prevJoints = joints;
+        }
         void set_inverse_bind_matrix(const glm::mat4& ibm);
         const glm::mat4& inverse_bind_matrix() const;
 
         void add_joint(int index, glm::mat4& joint);
         void set_joints(const std::map<int, glm::mat4>& joints);
         std::map<int, glm::mat4>& joints();
+        std::map<int, glm::mat4>& prev_joints();
 
     private:
         glm::mat4 _inverseBindMatrix = glm::mat4(1.0f);
         std::map<int, glm::mat4> _joints;
+        std::map<int, glm::mat4> _prevJoints;
     };
 
     struct MeshData

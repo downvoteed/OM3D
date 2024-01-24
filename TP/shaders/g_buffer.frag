@@ -10,6 +10,7 @@
 
 layout(location = 0) out vec4 out_albedo_roughness;
 layout(location = 1) out vec4 out_normal_metallic;
+layout(location = 2) out vec2 out_motionVector;
 
 layout(location = 0) in vec3 in_normal;
 layout(location = 1) in vec2 in_uv;
@@ -17,6 +18,8 @@ layout(location = 2) in vec3 in_color;
 layout(location = 3) in vec3 in_position;
 layout(location = 4) in vec3 in_tangent;
 layout(location = 5) in vec3 in_bitangent;
+layout(location = 6) in vec4 in_clipspace_position;
+layout(location = 7) in vec4 in_prev_clipspace_position;
 
 layout(binding = 0) uniform sampler2D in_texture;
 layout(binding = 1) uniform sampler2D in_normal_texture;
@@ -42,6 +45,9 @@ void main() {
     out_color = vec4(normal * 0.5 + 0.5, 1.0);
 #endif
 
+    vec3 ndc_pos = (in_clipspace_position / in_clipspace_position.w).xyz;
+    vec3 prev_ndc_pos = (in_prev_clipspace_position / in_prev_clipspace_position.w).xyz;
+    out_motionVector = ndc_pos.xy - prev_ndc_pos.xy;
 
     out_albedo_roughness = vec4(out_color.rgb, 1.0);
     out_normal_metallic = vec4(normal, 1.0);

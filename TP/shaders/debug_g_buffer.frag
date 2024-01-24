@@ -7,6 +7,8 @@ layout(location = 0) out vec4 out_color;
 layout(binding = 0) uniform sampler2D in_depth;
 layout(binding = 1) uniform sampler2D in_albedo_roughness;
 layout(binding = 2) uniform sampler2D in_normal_metallic;
+layout(binding = 3) uniform sampler2D motion_vector;
+
 
 layout(binding = 4) uniform sampler2D in_hdr;
 

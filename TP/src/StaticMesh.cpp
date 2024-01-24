@@ -30,6 +30,10 @@ namespace OM3D
     {
         return this->_joints;
     }
+    std::map<int, glm::mat4>& Skeleton::prev_joints()
+    {
+        return this->_prevJoints;
+    }
 
     StaticMesh::StaticMesh(const MeshData& data)
         : _vertex_buffer(data.vertices)
