@@ -26,6 +26,7 @@ namespace OM3D
         }
 
         _material->set_uniform(HASH("model"), transform());
+        _material->set_uniform(HASH("model_prev"), _prevTransform);
 
         if (const auto skeleton = _mesh->get_skeleton(); !skeleton)
         {
@@ -67,6 +68,7 @@ namespace OM3D
 
     void SceneObject::set_transform(const glm::mat4& tr)
     {
+        _prevTransform = _transform;
         _transform = tr;
     }
 

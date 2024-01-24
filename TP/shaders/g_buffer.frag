@@ -47,8 +47,8 @@ void main() {
 
     vec3 ndc_pos = (in_clipspace_position / in_clipspace_position.w).xyz;
     vec3 prev_ndc_pos = (in_prev_clipspace_position / in_prev_clipspace_position.w).xyz;
-    out_motionVector = ndc_pos.xy - prev_ndc_pos.xy;
 
+    out_motionVector = ndc_pos.xy - prev_ndc_pos.xy;
     out_albedo_roughness = vec4(out_color.rgb, 1.0);
     out_normal_metallic = vec4(normal, 1.0);
 }

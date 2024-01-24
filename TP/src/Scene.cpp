@@ -21,7 +21,7 @@ void Scene::add_light(PointLight obj) {
     _point_lights.emplace_back(std::move(obj));
 }
 
-Span<const SceneObject> Scene::objects() const {
+Span<SceneObject> Scene::objects() {
     return _objects;
 }
 
@@ -169,6 +169,10 @@ void Scene::renderAnimators() const
 }
 void Scene::renderMotionBlur() const
 {
+
+    //buffer.bind(BufferUsage::Uniform, 0);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
 }
 

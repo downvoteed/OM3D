@@ -67,7 +67,7 @@ void update_delta_time()
     time = new_time;
 }
 
-void process_inputs(GLFWwindow* window, Camera& camera)
+void process_inputs(GLFWwindow* window, Camera& camera, SceneObject& object)
 {
     static glm::dvec2 mouse_pos;
 
@@ -91,6 +91,17 @@ void process_inputs(GLFWwindow* window, Camera& camera)
         if (glfwGetKey(window, 'A') == GLFW_PRESS)
         {
             movement -= camera.right();
+        }
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        {
+            // translate object with a certain sensitivity
+            object.set_transform(glm::translate(object.transform(),
+                                                glm::vec3(0.00f, 0.0f, 0.1f)));
+        }
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        {
+            object.set_transform(glm::translate(object.transform(),
+                                                glm::vec3(0.00f, 0.0f, -0.1f)));
         }
 
         float speed = 10.0f;
@@ -424,6 +435,8 @@ int main(int argc, char** argv)
     auto g_buffer_program =
         Program::from_files("debug_g_buffer.frag", "screen.vert");
     auto lights_program = Program::from_files("sun.frag", "screen.vert");
+    auto motion_blur_program =
+        Program::from_files("motion_blur.frag", "screen.vert");
 
     RendererState renderer;
 
@@ -449,10 +462,13 @@ int main(int argc, char** argv)
 
         update_delta_time();
 
+        // first object
+        SceneObject& object = scene->objects()[0];
+
         if (const auto& io = ImGui::GetIO();
             !io.WantCaptureMouse && !io.WantCaptureKeyboard)
         {
-            process_inputs(window, scene->camera());
+            process_inputs(window, scene->camera(), object);
         }
 
         // Render the scene
@@ -464,7 +480,7 @@ int main(int argc, char** argv)
             renderer.depth_texture.bind(0);
             renderer.g_buffer_motion.bind(3);
             scene->renderMotionBlur();
-            scene->renderAnimators();
+            // scene->renderAnimators();
             glPopDebugGroup();
         }
         glDisable(GL_CULL_FACE);
@@ -483,14 +499,23 @@ int main(int argc, char** argv)
                 scene->renderLights();
                 glPopDebugGroup();
 
+                glDrawArrays(GL_TRIANGLES, 0, 3);
+                glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 3, -1,
+                                 "Motion blur");
+                glPopDebugGroup();
+                renderer.tone_map_framebuffer.bind();
+                motion_blur_program->bind();
+                renderer.depth_texture.bind(0);
+                renderer.g_buffer_albedo.bind(1);
+                renderer.g_buffer_normal.bind(2);
+                glDrawArrays(GL_TRIANGLES, 0, 3);
                 glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 2, -1,
                                  "Tone Map");
                 glPopDebugGroup();
-                renderer.tone_map_framebuffer.bind();
+                renderer.tone_map_framebuffer.bind(false);
                 tonemap_program->bind();
                 tonemap_program->set_uniform(HASH("exposure"), exposure);
                 renderer.lights_texture.bind(0);
-                glDrawArrays(GL_TRIANGLES, 0, 3);
             }
         }
         else

@@ -26,7 +26,7 @@ class Scene : NonMovable {
         void add_object(SceneObject obj);
         void add_light(PointLight obj);
 
-        Span<const SceneObject> objects() const;
+        Span<SceneObject> objects();
         Span<const PointLight> point_lights() const;
         std::vector<AnimationChannel>& animators();
 

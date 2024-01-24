@@ -27,6 +27,7 @@ class SceneObject {
 
     private:
         glm::mat4 _transform = glm::mat4(1.0f);
+        glm::mat4 _prevTransform = glm::mat4(1.0f);
 
         std::shared_ptr<StaticMesh> _mesh;
         std::shared_ptr<Material> _material;

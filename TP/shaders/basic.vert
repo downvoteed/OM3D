@@ -24,6 +24,7 @@ layout(binding = 0) uniform Data {
 };
 
 uniform mat4 model;
+uniform mat4 model_prev;
 uniform bool u_has_skeleton;
 
 const int MAX_JOINTS = 256;
@@ -40,33 +41,11 @@ void main()
     out_uv = in_uv;
     out_color = in_color;
 
-    vec4 position = vec4(vec3(0), 1);
+    out_clip_space_prev_position = frame.camera.view_proj * model_prev * vec4(in_pos, 1);
+    out_clip_space_position = frame.camera.view_proj * model * vec4(in_pos, 1);
 
-    if (u_has_skeleton)
-    {
-        mat4 skin_matrix =
-        in_weight.x * u_joint_matrix[int(in_joint.x)] +
-        in_weight.y * u_joint_matrix[int(in_joint.y)] +
-        in_weight.z * u_joint_matrix[int(in_joint.z)] +
-        in_weight.w * u_joint_matrix[int(in_joint.w)];
+    out_position = out_clip_space_position.xyz;
 
-        position = skin_matrix * vec4(in_pos, 1.0);
-        out_clip_space_position = frame.camera.view_proj * model * position;
-
-        mat4 prev_skin_matrix =
-        in_weight.x * u_joint_matrix_prev[int(in_joint.x)] +
-        in_weight.y * u_joint_matrix_prev[int(in_joint.y)] +
-        in_weight.z * u_joint_matrix_prev[int(in_joint.z)] +
-        in_weight.w * u_joint_matrix_prev[int(in_joint.w)];
-
-        out_clip_space_prev_position = frame.camera.view_proj * model * prev_skin_matrix * vec4(in_pos, 1.0);
-    }
-    else
-    {
-        position = vec4(in_pos, 1.0);
-    }
-
-    out_position = position.xyz;
-    gl_Position = frame.camera.view_proj * model * position;
+    gl_Position = out_clip_space_position;
 }
 
